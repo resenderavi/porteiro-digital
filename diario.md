@@ -5,6 +5,7 @@
 - Conta no Figma criada.
 - Repositório criado com as pastas: `frontend/recepcao/`, `frontend/atendente/` e `prototipos/`.
 - Link do repositório: https://github.com/resenderavi/porteiro-digital/edit/main/diario.md
+- Obs: O arquivo HTML teste está na pasta frontend/recepcao.
 
 ## Desafios e Dúvidas
 No momento de testar o modo Kiosk, o terminal do PowerShell não reconheceu o comando padrão. A solução foi adaptar o comando usando `Start-Process chrome -ArgumentList "--kiosk", "--app=..."`.
