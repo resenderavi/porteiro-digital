@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "nome": "Carlos Souza",
+    "cpf": "123.456.789-00",
+    "hora_chegada": "09:15",
+    "status": "aguardando",
+    "responsavel": "Prof. Ana Lima",
+    "motivo": "Entrega de documentos"
+  },
+  {
+    "id": 2,
+    "nome": "Fernanda Lima",
+    "cpf": "987.654.321-11",
+    "hora_chegada": "09:30",
+    "status": "em_aprovacao",
+    "responsavel": "Prof. Lucas",
+    "motivo": "Reunião PICTI"
+  },
+  {
+    "id": 3,
+    "nome": "Marcos Santos",
+    "cpf": "456.789.123-22",
+    "hora_chegada": "10:00",
+    "status": "autorizado",
+    "responsavel": "Setor de TI",
+    "motivo": "Manutenção de rede"
+  },
+  {
+    "id": 4,
+    "nome": "Patrícia Dias",
+    "cpf": "321.654.987-33",
+    "hora_chegada": "10:15",
+    "status": "recusado",
+    "responsavel": "Recursos Humanos",
+    "motivo": "Visita técnica"
+  }
+]

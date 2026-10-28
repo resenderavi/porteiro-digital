@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Porteiro Digital - Atendente</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+
+        h1 { color: #004c97; margin-top: 0; }
+        h2 { color: #333; font-size: 1.2rem; border-bottom: 2px solid #eee; padding-bottom: 8px; }
+
+        .colunas {
+            display: flex;
+            gap: 20px;
+        }
+
+        .coluna-esquerda { width: 55%; }
+        .coluna-direita { width: 45%; }
+
+        .caixa {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: #f9f9f9;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 6px solid #ccc;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card:hover { background: #eef2f7; }
+
+        .aguardando { border-left-color: orange; }
+        .em_aprovacao { border-left-color: #007bff; }
+        .autorizado { border-left-color: #28a745; }
+        .recusado { border-left-color: #dc3545; }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 1rem;
+        }
+
+        .btn-aprovar { background-color: #28a745; }
+        .btn-recusar { background-color: #dc3545; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border-bottom: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th { background-color: #f4f4f9; }
+    </style>
+</head>
+<body>
+
+    <h1>Porteiro Digital - Painel do Atendente</h1>
+
+    <div class="colunas">
+        
+        <div class="coluna-esquerda">
+            <div class="caixa">
+                <h2>Fila de Visitantes</h2>
+                <div id="fila"></div>
+            </div>
+
+            <div class="caixa">
+                <h2>Histórico do Dia</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Hora entrada</th>
+                            <th>Hora saída</th>
+                            <th>Responsável</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-historico"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="coluna-direita">
+            <div class="caixa">
+                <h2>Detalhes do Visitante</h2>
+                <div id="detalhes">
+                    <p>Clique num visitante da fila para ver os dados.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let visitantes = [];
+
+        function mascararCPF(cpf) {
+            return cpf.substring(0, 3) + ".***.***-" + cpf.slice(-2);
+        }
+
+        // 1. Busca os dados dos JSONs usando fetch() conforme pede a S7
+        fetch('../mocks/fila.json')
+            .then(r => r.json())
+            .then(data => {
+                visitantes = data;
+                renderFila(visitantes);
+            });
+
+        fetch('../mocks/historico.json')
+            .then(r => r.json())
+            .then(data => {
+                const tbody = document.getElementById('tabela-historico');
+                data.forEach(h => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${h.nome}</td>
+                            <td>${h.hora_entrada}</td>
+                            <td>${h.hora_saida}</td>
+                            <td>${h.responsavel}</td>
+                        </tr>
+                    `;
+                });
+            });
+
+        // 2. Função renderFila(dados) exigida na S7
+        function renderFila(dados) {
+            const divFila = document.getElementById('fila');
+            divFila.innerHTML = '';
+
+            dados.forEach(v => {
+                divFila.innerHTML += `
+                    <div class="card ${v.status}" onclick="mostrarDetalhes(${v.id})">
+                        <span><strong>${v.nome}</strong> (${v.hora_chegada})</span>
+                        <span>${v.status.replace('_', ' ').toUpperCase()}</span>
+                    </div>
+                `;
+            });
+        }
+
+        // 3. Mostra os detalhes quando clica no card
+        function mostrarDetalhes(id) {
+            const v = visitantes.find(item => item.id === id);
+            document.getElementById('detalhes').innerHTML = `
+                <p><strong>Nome:</strong> ${v.nome}</p>
+                <p><strong>CPF:</strong> ${mascararCPF(v.cpf)}</p>
+                <p><strong>Motivo:</strong> ${v.motivo}</p>
+                <p><strong>Responsável:</strong> ${v.responsavel}</p>
+                <p><strong>Hora de chegada:</strong> ${v.hora_chegada}</p>
+                <p><strong>Status:</strong> ${v.status.replace('_', ' ')}</p>
+                <br>
+                <button class="btn-aprovar" onclick="mudarStatus(${v.id}, 'autorizado')">Aprovar entrada</button>
+                <button class="btn-recusar" onclick="mudarStatus(${v.id}, 'recusado')">Recusar</button>
+            `;
+        }
+
+        // 4. Muda o status ao clicar nos botões
+        function mudarStatus(id, novoStatus) {
+            const v = visitantes.find(item => item.id === id);
+            v.status = novoStatus;
+            renderFila(visitantes);
+            mostrarDetalhes(id);
+        }
+    </script>
+</body>
+</html>

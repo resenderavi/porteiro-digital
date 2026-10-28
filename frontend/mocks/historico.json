@@ -1,0 +1,7 @@
+[
+  { "nome": "Mariana Costa", "hora_entrada": "08:10", "hora_saida": "09:05", "responsavel": "Prof. Ana Lima" },
+  { "nome": "Roberto Silva", "hora_entrada": "08:30", "hora_saida": "09:45", "responsavel": "Coordenação TI" },
+  { "nome": "Juliana Martins", "hora_entrada": "09:00", "hora_saida": "10:15", "responsavel": "Prof. Marcos" },
+  { "nome": "Fernando Gomes", "hora_entrada": "09:20", "hora_saida": "11:00", "responsavel": "Secretaria" },
+  { "nome": "Beatriz Rocha", "hora_entrada": "10:05", "hora_saida": "11:30", "responsavel": "Direção" }
+]
