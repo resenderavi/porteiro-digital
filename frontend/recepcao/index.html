@@ -70,6 +70,11 @@
         }
         
         h2 { color: #333; margin-top: 0; font-size: 1.8rem; }
+
+        #erroEnvio {
+            color: #b00020;
+            font-weight: bold;
+        }
         
         #resumo {
             text-align: left;
@@ -104,7 +109,8 @@
         <p>Verifique se os dados estão corretos:</p>
         <div id="resumo"></div>
         <button class="voltar" onclick="proximoPasso(3, 2)">Voltar</button>
-        <button class="confirmar" onclick="enviarFormulario()">Confirmar e Enviar</button>
+        <p id="erroEnvio" role="alert"></p>
+        <button id="btnEnviar" class="confirmar" onclick="enviarFormulario()">Confirmar e Enviar</button>
     </div>
 
     <div id="passo4" class="passo">
@@ -132,9 +138,52 @@
             document.getElementById('passo' + proximo).classList.add('ativo');
         }
 
-        function enviarFormulario() {
+        // Enquanto o backend não existe, USAR_MOCK simula a resposta da API (S7).
+        // Quando a API estiver pronta: USAR_MOCK = false e URL_CADASTRO com o endpoint real.
+        const USAR_MOCK = true;
+        const URL_CADASTRO = '/api/visitantes';
+
+        function postarVisitante(dados) {
+            if (USAR_MOCK) {
+                console.log('POST (mock)', URL_CADASTRO, dados);
+                return Promise.resolve(new Response(JSON.stringify({ status: 'aguardando' }), { status: 201 }));
+            }
+
+            return fetch(URL_CADASTRO, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            });
+        }
+
+        async function enviarFormulario() {
+            const botao = document.getElementById('btnEnviar');
+            const erro = document.getElementById('erroEnvio');
+            const dados = {
+                nome: document.getElementById('nome').value,
+                cpf: document.getElementById('cpf').value,
+                motivo: document.getElementById('motivo').value,
+                responsavel: document.getElementById('responsavel').value
+            };
+
+            botao.disabled = true;
+            erro.textContent = '';
+
+            try {
+                const resposta = await postarVisitante(dados);
+                if (!resposta.ok) {
+                    throw new Error('Resposta da API: ' + resposta.status);
+                }
+            } catch (e) {
+                console.error('Falha ao enviar o cadastro:', e);
+                erro.textContent = 'Não foi possível enviar o pedido. Tente novamente.';
+                botao.disabled = false;
+                return;
+            }
+
+            botao.disabled = false;
             proximoPasso(3, 4);
-            
+
             setTimeout(() => {
                 document.getElementById('nome').value = '';
                 document.getElementById('cpf').value = '';
