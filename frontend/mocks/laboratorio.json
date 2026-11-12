@@ -1,0 +1,25 @@
+{
+  "id": "labmaker",
+  "nome": "LabMaker",
+  "modo": "controle",
+  "abertura": "assistida",
+  "T1_min": 3,
+  "T2_min": 10,
+  "N_tentativas": 5,
+  "bloqueio_temporario_min": 5,
+  "prazo_retencao_foto": "a definir (parâmetro P)",
+  "motivos": [
+    "Conhecer o laboratório",
+    "Falar com um professor",
+    "Reunião agendada",
+    "Entrega de material",
+    "Manutenção / serviço"
+  ],
+  "responsaveis": [
+    { "id": "resp-helena", "nome": "Profa. Helena Duarte", "telefone": "(27) 9 0000-0001", "coordenacao": true },
+    { "id": "resp-rafael", "nome": "Prof. Rafael Moreira", "telefone": "(27) 9 0000-0002", "coordenacao": false },
+    { "id": "resp-carla", "nome": "Profa. Carla Nunes", "telefone": "(27) 9 0000-0003", "coordenacao": false }
+  ],
+  "uso_restrito": null,
+  "visitantes_bloqueados": ["Visitante Bloqueado"]
+}

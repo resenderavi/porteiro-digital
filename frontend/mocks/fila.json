@@ -1,38 +1,66 @@
 [
   {
-    "id": 1,
-    "nome": "Carlos Souza",
-    "cpf": "123.456.789-00",
-    "hora_chegada": "09:15",
-    "status": "aguardando",
-    "responsavel": "Prof. Ana Lima",
-    "motivo": "Entrega de documentos"
-  },
-  {
-    "id": 2,
-    "nome": "Fernanda Lima",
-    "cpf": "987.654.321-11",
-    "hora_chegada": "09:30",
-    "status": "em_aprovacao",
-    "responsavel": "Prof. Lucas",
-    "motivo": "Reunião PICTI"
-  },
-  {
-    "id": 3,
-    "nome": "Marcos Santos",
-    "cpf": "456.789.123-22",
-    "hora_chegada": "10:00",
+    "id": "P-001",
+    "tipo": "visitante",
+    "nome": "Juliana Ferreira",
+    "motivo": "Conhecer o laboratório",
+    "falar_com": "resp-helena",
+    "foto": null,
+    "sem_foto": false,
+    "criado_em": "2026-11-12T09:15:00",
     "status": "autorizado",
-    "responsavel": "Setor de TI",
-    "motivo": "Manutenção de rede"
+    "notificados": [{ "responsavel": "resp-helena", "em": "2026-11-12T09:15:00" }],
+    "decisao": { "por": "resp-helena", "acao": "autorizar", "validade": "esta_entrada", "em": "2026-11-12T09:17:00" },
+    "encerramento": null,
+    "contato": null
   },
   {
-    "id": 4,
-    "nome": "Patrícia Dias",
-    "cpf": "321.654.987-33",
-    "hora_chegada": "10:15",
-    "status": "recusado",
-    "responsavel": "Recursos Humanos",
-    "motivo": "Visita técnica"
+    "id": "P-002",
+    "tipo": "visitante",
+    "nome": "Carlos Souza",
+    "motivo": "Entrega de material",
+    "falar_com": null,
+    "foto": null,
+    "sem_foto": false,
+    "criado_em": "2026-11-12T09:40:00",
+    "status": "negado",
+    "notificados": [{ "responsavel": "resp-helena", "em": "2026-11-12T09:40:00" }],
+    "decisao": { "por": "resp-helena", "acao": "negar_agendar", "validade": null, "em": "2026-11-12T09:42:00" },
+    "encerramento": null,
+    "contato": { "valor": "carlos.souza@exemplo.com", "em": "2026-11-12T09:43:00" }
+  },
+  {
+    "id": "P-003",
+    "tipo": "sem_identificacao",
+    "nome": null,
+    "motivo": null,
+    "falar_com": null,
+    "foto": null,
+    "sem_foto": true,
+    "criado_em": "2026-11-12T10:02:00",
+    "status": "encerrado",
+    "notificados": [],
+    "decisao": null,
+    "encerramento": { "por": "Anderson Lima", "motivo": "Entrega recebida pela portaria", "em": "2026-11-12T10:05:00" },
+    "contato": null
+  },
+  {
+    "id": "P-004",
+    "tipo": "visitante",
+    "nome": "Fernanda Lima",
+    "motivo": "Reunião agendada",
+    "falar_com": "resp-rafael",
+    "foto": null,
+    "sem_foto": false,
+    "criado_em": "2026-11-12T10:20:00",
+    "status": "expirado",
+    "notificados": [
+      { "responsavel": "resp-rafael", "em": "2026-11-12T10:20:00" },
+      { "responsavel": "resp-helena", "em": "2026-11-12T10:23:00" },
+      { "responsavel": "resp-carla", "em": "2026-11-12T10:26:00" }
+    ],
+    "decisao": null,
+    "encerramento": null,
+    "contato": null
   }
 ]

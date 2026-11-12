@@ -21,39 +21,51 @@ Após a leitura da documentação e a reunião de kick-off com toda a equipe (Ra
 
 ---
 
-# Revisão das entregas S5, S6 e S7 — telas iguais ao protótipo do Figma (12/11/2026)
+# Revisão das entregas S5, S6 e S7 — alinhamento com o Documento de Requisitos v1.0 (12/11/2026)
 
-Refiz a tela da recepção e o painel do atendente para seguirem os wireframes da S3 e o protótipo do Figma da S4.
+As telas da S5–S7 foram refeitas para seguir o Documento de Requisitos consolidado (03/11/2026). Onde o protótipo do Figma ou a sprint discordavam do documento, segui o documento.
 
 ## O que mudou
 
-**Tela da recepção (`frontend/recepcao/index.html`, S5)**: os 3 estados do wireframe.
-1. Boas-vindas: "Bem-vindo!" + "Toque aqui para iniciar".
-2. Formulário em duas colunas: Nome, Motivo, CPF e Responsável (lista vinda da API) + "Avançar". O CPF tem máscara e validação dos dígitos, e os campos com erro ficam em vermelho.
-3. "Registro concluído!" com a hora de entrada (calculada pelo frontend) + "Sair". Volta sozinha ao início depois de 15 s.
-- Mantidas as regras de kiosk da S5: sem rolagem, cursor oculto (`?cursor=1` mostra o cursor para testar no PC), fonte base 20px, botões com 60px ou mais. Em retrato (800×1280) o formulário vira uma coluna.
+**Tela da recepção (`frontend/recepcao/index.html`, S5)**
+- Tela inicial com as duas opções do cenário 1: **Tenho cadastro** e **Sou visitante**.
+- Aviso de privacidade antes do formulário (RNF03, RN13).
+- Wizard de 3 passos: (1) nome, motivo (lista + "Outro") e, opcionalmente, com quem falar; (2) foto com revisão e "tirar outra" (RF16); (3) **confirmação** antes de enviar.
+- **Sem CPF** (RF10 + coleta mínima da LGPD).
+- Tela de espera com status e tempo restante, atualizando sozinha (RF25), e aviso de repasse quando o responsável não responde (RF27).
+- Resultados: autorizado (mostra quem autorizou), negado (não mostra quem negou), negado com sugestão de agendamento e expirado (oferece deixar contato, RF26).
+- **Chamar atendente** para quem não quer se identificar ou recusa a foto (RF31, cenário 3B).
+- Entrada de cadastrados com matrícula/SIAPE + PIN em teclado numérico na tela (D2, opção a), com bloqueio após N tentativas (RNF04). Se a pessoa já está dentro, registra a saída (proposta para o RF04).
+- Volta ao início após 2 minutos sem toque (cenário 1, fluxo 1.a).
+- Regras de kiosk da S5 mantidas: sem rolagem, cursor oculto (`?cursor=1` mostra o cursor para testar no PC), fonte base 20px, botões com 60px ou mais.
 
 **Painel do atendente (`frontend/atendente/index.html`, S6)**
-- Fila à esquerda (nome, hora e status com as cores da S6: laranja aguardando, azul em aprovação, verde autorizado, vermelho recusado).
-- Detalhe do visitante: Nome, CPF mascarado, Motivo, Responsável, Chegada e Status, com **Aprovar** e **Recusar**. Ao abrir um visitante "aguardando", ele passa para "em aprovação".
-- Tabela "Registros do dia": Nome, Hora de entrada e Status.
+- **Sem Aprovar/Recusar para o atendente.** Pela RN14 quem decide é o responsável, pelo celular. A decisão aparece numa caixa separada, marcada como **simulação**, só para testar o fluxo.
+- Fila com os status do RF28 (pendente, sem identificação, autorizado, negado, expirado, encerrado), com "sem identificação" em destaque no topo.
+- Detalhe com foto, linha do tempo (quem recebeu, repasses, decisão, contato) e, em pedido parado, os telefones dos responsáveis.
+- Encerrar pedido sem identificação com motivo obrigatório (RN14).
+- **Liberação manual** com justificativa obrigatória, só para cadastrados (RF29, cenário 5).
+- "No laboratório agora" e histórico do dia com **entrada, saída e quem autorizou** (RF03, RF04, RF21), além do status da tela da porta.
 
 **Mocks e contrato (S7)**
-- `frontend/js/api.js`: as telas chamam só esta camada. Em modo `mock` ela lê os JSON por `fetch()` e guarda o estado no `localStorage`, para o tablet e o painel conversarem entre abas. Para usar a API do Lucas, basta trocar `MODO` e `BASE_URL`.
-- `fila.json`, `historico.json` e o novo `responsaveis.json`.
-- `api-contrato.md` com os 5 endpoints. **Falta a aprovação do Lucas.**
+- `frontend/js/api.js`: as telas chamam só esta camada. Em modo `mock` ela lê os JSON por `fetch()` e guarda o estado no `localStorage`, para a tela da porta e o painel conversarem entre abas. Para usar a API do Lucas, basta trocar `MODO` e `BASE_URL`.
+- `fila.json` e `historico.json` no novo formato; novos `laboratorio.json` e `usuarios.json`.
+- `api-contrato.md` com todos os endpoints. **Falta a aprovação do Lucas.**
 
 ## Como testar
 1. Abrir a pasta no VS Code e iniciar o Live Server.
-2. Aba 1: `http://localhost:5500/frontend/recepcao/?cursor=1` (tablet).
-3. Aba 2: `http://localhost:5500/frontend/atendente/` (atendente).
-4. Cadastrar um visitante na aba 1 (CPF de teste: `529.982.247-25`). Ele aparece na fila da aba 2 sem recarregar; aprovar ou recusar e ver a tabela atualizar.
-5. Kiosk no Windows: `Start-Process chrome -ArgumentList "--kiosk", "--app=http://localhost:5500/frontend/recepcao/"`
+2. Aba 1: `http://localhost:5500/frontend/recepcao/?cursor=1` (tela da porta).
+3. Aba 2: `http://localhost:5500/frontend/atendente/` (painel).
+4. Fazer um pedido como visitante na aba 1, ver o pedido aparecer na aba 2 e decidir pela caixa de simulação. A tela da porta muda sozinha.
+5. Credenciais de teste: ver o final de `frontend/mocks/api-contrato.md` (ex.: matrícula `20241BSI0012`, PIN `1234`).
+6. Kiosk no Windows: `Start-Process chrome -ArgumentList "--kiosk", "--app=http://localhost:5500/frontend/recepcao/"`
 
-## Divergências com o Documento de Requisitos v1.0 (para a equipe decidir)
-As telas seguem o protótipo, mas o documento de requisitos (03/11/2026) pede algumas coisas diferentes:
-- **CPF:** o documento pede só nome, motivo e, opcionalmente, com quem falar (RF10), por causa da coleta mínima da LGPD.
-- **Aprovar/Recusar no atendente:** pela RN14 o atendente não autoriza visitantes; quem decide é o responsável pelo celular (RF11).
-- **Faltam no protótipo:** foto do visitante (RF16), tela inicial com "Tenho cadastro / Sou visitante", status do pedido na tela (RF25), entrada de cadastrados por credencial (RF01) e chamar atendente (RF31).
-
-Levar esses pontos para a orientadora e para a revisão cruzada da S8.
+## Pendências e dúvidas para a equipe
+- Lucas: aprovar o `api-contrato.md` (critério da S7).
+- **Figma:** o protótipo da S4 ainda segue o modelo antigo (CPF, atendente aprovando). Precisa ser atualizado para espelhar o código (ver `prototipos/link-figma-prototipo.md`).
+- D1 (fechadura): a tela está como **abertura assistida** ("aguarde a abertura da porta").
+- D2 (credencial): implementei matrícula + PIN; QR code fica para depois, se escolhido.
+- D3 (canal): a decisão do responsável está simulada no painel.
+- Pedido sem foto: só é permitido quando a câmera falha; quem recusa a foto vai para "Chamar atendente". Confirmar com a equipe (ponto em aberto do documento).
+- Registro de saída: proposta de "identificar de novo = saída". Confirmar com a equipe.
+- Prazo P de retenção da foto: ainda "a definir"; a tela mostra esse texto.

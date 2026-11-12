@@ -3,179 +3,434 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Porteiro Digital — Atendente</title>
+    <title>Porteiro Digital — Painel do Atendente</title>
     <style>
         :root {
             --primaria: #004c97;
             --fundo: #eef2f7;
+            --cartao: #ffffff;
             --texto: #1c2430;
             --suave: #556172;
             --borda: #d5dce6;
-            --aguardando: #b35c00;    --aguardando-bg: #fff3e0;
-            --em_aprovacao: #0b5cad;  --em_aprovacao-bg: #e3eefa;
-            --autorizado: #1e7e34;    --autorizado-bg: #e6f4ea;
-            --recusado: #c62828;      --recusado-bg: #fdecea;
+            --pendente: #a35a00;     --pendente-bg: #fff3e0;
+            --semid: #6a1b9a;        --semid-bg: #f3e5f5;
+            --autorizado: #1e7e34;   --autorizado-bg: #e6f4ea;
+            --negado: #c62828;       --negado-bg: #fdecea;
+            --expirado: #5f6b7a;     --expirado-bg: #eceff3;
+            --encerrado: #37474f;    --encerrado-bg: #e8edf0;
+            --registrado: #004c97;   --registrado-bg: #e3eefa;
         }
         * { box-sizing: border-box; }
         body { margin: 0; font-family: "Segoe UI", Roboto, Arial, sans-serif; font-size: 15px; background: var(--fundo); color: var(--texto); }
 
-        header { background: var(--primaria); color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-        header h1 { font-size: 1.3rem; margin: 0; }
-        header .data { opacity: .9; }
-
-        /* Duas colunas: fila à esquerda, detalhe + tabela à direita (wireframe) */
-        .colunas { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr); gap: 20px; padding: 20px 24px; max-width: 1700px; margin: 0 auto; }
-        @media (max-width: 900px) { .colunas { grid-template-columns: 1fr; } }
-
-        .caixa { background: #fff; border-radius: 12px; padding: 16px 18px; box-shadow: 0 2px 8px rgba(0, 40, 90, .07); margin-bottom: 20px; }
-        .caixa h2 { font-size: 1.05rem; margin: 0 0 12px; display: flex; align-items: center; gap: 10px; }
-        .contador { background: var(--fundo); color: var(--suave); border-radius: 999px; padding: 1px 9px; font-size: .8rem; }
-
-        /* Fila */
-        .fila { display: flex; flex-direction: column; gap: 8px; max-height: calc(100vh - 170px); overflow-y: auto; }
-        .card {
-            display: flex; justify-content: space-between; align-items: center; gap: 10px;
-            padding: 12px 14px; border-radius: 8px; background: #f6f8fb;
-            border-left: 6px solid var(--cor); cursor: pointer;
+        header {
+            background: var(--primaria); color: #fff;
+            display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+            padding: 12px 24px;
         }
-        .card:hover { background: #edf2f8; }
-        .card.selecionado { outline: 2px solid var(--primaria); background: #edf2f8; }
+        header h1 { font-size: 1.25rem; margin: 0; }
+        header .info { opacity: .9; }
+        header .espaco { flex: 1; }
+        .pilula { padding: 4px 12px; border-radius: 999px; font-size: .85rem; font-weight: 600; background: rgba(255,255,255,.15); }
+        .pilula.online::before, .pilula.offline::before { content: ''; display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
+        .pilula.online::before { background: #6fdc8c; }
+        .pilula.offline { background: #c62828; }
+        .pilula.offline::before { background: #fff; }
+
+        .grade { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; padding: 20px 24px; max-width: 1800px; margin: 0 auto; }
+        @media (max-width: 1000px) { .grade { grid-template-columns: 1fr; } }
+
+        .caixa { background: var(--cartao); border-radius: 12px; padding: 16px 18px; box-shadow: 0 2px 8px rgba(0, 40, 90, .07); margin-bottom: 20px; }
+        .caixa h2 { font-size: 1.05rem; margin: 0 0 12px; display: flex; align-items: center; gap: 10px; }
+        .caixa h2 .contador { background: var(--fundo); color: var(--suave); border-radius: 999px; padding: 1px 9px; font-size: .8rem; }
+        .caixa.simulacao { border: 2px dashed #9aa8ba; background: #fafbfd; }
+        .nota { font-size: .85rem; color: var(--suave); margin: -6px 0 12px; }
+
+        button { font: inherit; font-weight: 600; border: none; border-radius: 8px; padding: 9px 16px; cursor: pointer; background: var(--primaria); color: #fff; }
+        button:hover { filter: brightness(1.1); }
+        button.secundario { background: #e3e8ef; color: var(--texto); }
+        button.verde { background: var(--autorizado); }
+        button.vermelho { background: var(--negado); }
+        button.claro { background: #fff; color: var(--primaria); }
+        button:disabled { opacity: .5; cursor: default; }
+
+        .filtros { display: flex; gap: 8px; margin-bottom: 12px; }
+        .filtros button { background: var(--fundo); color: var(--texto); font-weight: 500; padding: 6px 14px; }
+        .filtros button.ativo { background: var(--primaria); color: #fff; }
+
+        /* Cards da fila */
+        .fila { display: flex; flex-direction: column; gap: 8px; max-height: 420px; overflow-y: auto; }
+        .card {
+            display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center;
+            padding: 10px 14px; border-radius: 8px; border-left: 6px solid var(--cor); background: #f8fafc; cursor: pointer;
+        }
+        .card:hover { background: #eef3f9; }
+        .card.selecionado { outline: 2px solid var(--primaria); background: #eef3f9; }
         .card .nome { font-weight: 600; }
-        .card .hora { color: var(--suave); font-variant-numeric: tabular-nums; }
+        .card .sub { grid-column: 1 / -1; font-size: .85rem; color: var(--suave); }
+        .card.sem_identificacao { animation: chama 1.4s ease-in-out infinite; }
+        @keyframes chama { 50% { background: var(--semid-bg); } }
 
         .status { font-size: .78rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; color: var(--cor); background: var(--cor-bg); white-space: nowrap; }
-        .aguardando { --cor: var(--aguardando); --cor-bg: var(--aguardando-bg); }
-        .em_aprovacao { --cor: var(--em_aprovacao); --cor-bg: var(--em_aprovacao-bg); }
+        .pendente { --cor: var(--pendente); --cor-bg: var(--pendente-bg); }
+        .sem_identificacao { --cor: var(--semid); --cor-bg: var(--semid-bg); }
         .autorizado { --cor: var(--autorizado); --cor-bg: var(--autorizado-bg); }
-        .recusado { --cor: var(--recusado); --cor-bg: var(--recusado-bg); }
+        .negado { --cor: var(--negado); --cor-bg: var(--negado-bg); }
+        .expirado { --cor: var(--expirado); --cor-bg: var(--expirado-bg); }
+        .encerrado { --cor: var(--encerrado); --cor-bg: var(--encerrado-bg); }
+        .registrado { --cor: var(--registrado); --cor-bg: var(--registrado-bg); }
+        .vazio { color: var(--suave); padding: 12px 0; }
+        .suave { color: var(--suave); font-weight: 400; }
 
         /* Detalhe */
-        dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 10px 20px; font-size: 1.05rem; }
+        .detalhe-topo { display: flex; gap: 16px; align-items: flex-start; }
+        .detalhe-topo img, .sem-foto { width: 150px; aspect-ratio: 4 / 3; border-radius: 8px; object-fit: cover; flex: none; }
+        .detalhe-topo img { transform: scaleX(-1); }
+        .sem-foto { background: var(--fundo); color: var(--suave); display: flex; align-items: center; justify-content: center; font-size: .85rem; text-align: center; padding: 6px; }
+        dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; }
         dt { color: var(--suave); }
         dd { margin: 0; font-weight: 600; }
-        .vazio { color: var(--suave); }
-        .botoes { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
-        button { font: inherit; font-weight: 700; border: none; border-radius: 8px; padding: 12px 26px; color: #fff; cursor: pointer; }
-        button:hover { filter: brightness(1.1); }
-        button:disabled { opacity: .45; cursor: default; filter: none; }
-        .btn-aprovar { background: var(--autorizado); }
-        .btn-recusar { background: var(--recusado); }
+        h3 { font-size: .95rem; margin: 16px 0 8px; }
+        .linha-tempo { list-style: none; margin: 0; padding: 0; font-size: .9rem; }
+        .linha-tempo li { padding: 4px 0 4px 16px; border-left: 2px solid var(--borda); position: relative; }
+        .linha-tempo li::before { content: ''; position: absolute; left: -5px; top: 10px; width: 8px; height: 8px; border-radius: 50%; background: var(--primaria); }
+        .aviso-regra { background: #fff8e6; border-left: 4px solid var(--pendente); padding: 10px 12px; border-radius: 6px; font-size: .9rem; }
+        textarea, input[type=text], select { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--borda); border-radius: 8px; }
+        textarea { min-height: 70px; resize: vertical; }
+        .botoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .sugestoes { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+        .sugestoes button { background: var(--fundo); color: var(--texto); font-weight: 500; padding: 5px 10px; font-size: .85rem; }
+        .retorno { margin-top: 10px; font-weight: 600; min-height: 1.2em; }
+        .retorno.erro { color: var(--negado); }
+        .retorno.ok { color: var(--autorizado); }
 
         /* Tabela */
         .tabela-box { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--borda); }
+        th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--borda); vertical-align: top; }
         th { background: #f4f6f9; font-size: .85rem; color: var(--suave); }
+        td small { color: var(--suave); display: block; }
+        .presentes { display: flex; flex-wrap: wrap; gap: 8px; }
+        .presentes span { background: var(--autorizado-bg); color: var(--autorizado); padding: 4px 10px; border-radius: 999px; font-weight: 600; font-size: .9rem; }
+
+        .avisos { list-style: none; margin: 0; padding: 0; font-size: .88rem; max-height: 260px; overflow-y: auto; }
+        .avisos li { padding: 6px 0; border-bottom: 1px solid var(--borda); }
+        .avisos b { color: var(--primaria); }
+
+        dialog { border: none; border-radius: 12px; padding: 22px; width: min(480px, 92vw); box-shadow: 0 10px 40px rgba(0,0,0,.25); }
+        dialog::backdrop { background: rgba(20, 30, 45, .45); }
+        dialog h2 { margin-top: 0; font-size: 1.15rem; }
+        dialog label { display: block; font-weight: 600; margin: 12px 0 6px; }
     </style>
 </head>
 <body>
     <header>
         <h1>Porteiro Digital — Painel do Atendente</h1>
-        <span class="data" id="data"></span>
+        <span class="info" id="cabecalho-info"></span>
+        <span class="espaco"></span>
+        <span class="pilula" id="status-tela">Tela da porta: verificando…</span>
+        <button class="claro" onclick="abrirLiberacao()">Liberação manual</button>
     </header>
 
-    <div class="colunas">
-        <section class="caixa">
-            <h2>Fila de visitantes <span class="contador" id="contador">0 aguardando</span></h2>
-            <div class="fila" id="fila"><p class="vazio">Carregando…</p></div>
-        </section>
-
+    <div class="grade">
         <div>
             <section class="caixa">
-                <h2>Visitante selecionado</h2>
-                <div id="detalhes"><p class="vazio">Clique em um visitante da fila para ver os dados.</p></div>
+                <h2>Fila de solicitações <span class="contador" id="contador-abertos">0 em aberto</span></h2>
+                <div class="filtros">
+                    <button data-filtro="abertos" class="ativo" onclick="filtrar('abertos')">Em aberto</button>
+                    <button data-filtro="todos" onclick="filtrar('todos')">Todos de hoje</button>
+                </div>
+                <div class="fila" id="fila"></div>
             </section>
 
             <section class="caixa">
-                <h2>Registros do dia</h2>
+                <h2>No laboratório agora</h2>
+                <div class="presentes" id="presentes"></div>
+            </section>
+
+            <section class="caixa">
+                <h2>Histórico do dia</h2>
                 <div class="tabela-box">
                     <table>
-                        <thead><tr><th>Nome</th><th>Hora de entrada</th><th>Status</th></tr></thead>
-                        <tbody id="tabela"></tbody>
+                        <thead>
+                            <tr><th>Nome</th><th>Perfil</th><th>Entrada</th><th>Saída</th><th>Como entrou / responsável</th></tr>
+                        </thead>
+                        <tbody id="tabela-historico"></tbody>
                     </table>
                 </div>
             </section>
         </div>
+
+        <div>
+            <section class="caixa">
+                <h2>Detalhes da solicitação</h2>
+                <div id="detalhes"><p class="vazio">Clique em uma solicitação da fila para ver os dados.</p></div>
+            </section>
+
+            <section class="caixa simulacao" id="caixa-simulacao" hidden>
+                <h2>Simulação: celular do responsável</h2>
+                <p class="nota">Só para testes. No sistema real, o responsável decide pelo canal de mensagens (D3) e o atendente não autoriza visitantes (RN14).</p>
+                <label for="sim-resp" style="font-weight:600">Responder como</label>
+                <select id="sim-resp"></select>
+                <div class="botoes">
+                    <button class="verde" onclick="simular('autorizar', 'esta_entrada')">Autorizar (só esta entrada)</button>
+                    <button class="verde" onclick="simular('autorizar', 'dia')">Autorizar (resto do dia)</button>
+                    <button class="vermelho" onclick="simular('negar')">Negar</button>
+                    <button class="vermelho" onclick="simular('negar_agendar')">Negar e sugerir agendamento</button>
+                </div>
+                <div class="retorno" id="sim-retorno"></div>
+            </section>
+
+            <section class="caixa">
+                <h2>Avisos enviados</h2>
+                <p class="nota">Mensagens que o sistema mandou pelo canal de mensagens (simuladas).</p>
+                <ul class="avisos" id="avisos"></ul>
+            </section>
+        </div>
     </div>
+
+    <!-- Liberação manual (RF29, cenário 5) -->
+    <dialog id="dlg-liberacao">
+        <h2>Liberação manual</h2>
+        <p class="nota" style="margin:0">Só para usuário cadastrado, em caso de falha do sistema. Confirme a identidade presencialmente ou por documento.</p>
+        <label for="lib-matricula">Matrícula ou SIAPE</label>
+        <input type="text" id="lib-matricula" autocomplete="off">
+        <label for="lib-justificativa">Justificativa (obrigatória)</label>
+        <textarea id="lib-justificativa" placeholder="Ex.: Falha de rede na tela. Aluno identificado presencialmente."></textarea>
+        <div class="retorno" id="lib-retorno"></div>
+        <div class="botoes" style="justify-content:flex-end">
+            <button class="secundario" onclick="document.getElementById('dlg-liberacao').close()">Cancelar</button>
+            <button onclick="confirmarLiberacao()">Liberar e registrar</button>
+        </div>
+    </dialog>
 
     <script src="../js/api.js"></script>
     <script>
-        const ROTULOS = { aguardando: 'Aguardando', em_aprovacao: 'Em aprovação', autorizado: 'Autorizado', recusado: 'Recusado' };
-        let visitantes = [];
+        const OPERADOR = 'Anderson Lima';
+        const ROTULOS = {
+            pendente: 'Pendente', sem_identificacao: 'Sem identificação', autorizado: 'Autorizado',
+            negado: 'Negado', expirado: 'Expirado', encerrado: 'Encerrado', registrado: 'Registrado'
+        };
+        const ORIGENS = { credencial: 'Credencial', visita_autorizada: 'Visita autorizada', liberacao_manual: 'Liberação manual', registro_visitante: 'Registro de visitante' };
+        const PERFIS = { bolsista: 'Bolsista', usuario: 'Usuário', limpeza: 'Limpeza/manutenção', visitante: 'Visitante' };
+
+        let lab = null;
+        let pedidos = [];
         let selecionado = null;
+        let filtro = 'abertos';
 
         const $ = (id) => document.getElementById(id);
         const esc = (t) => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-        const etiqueta = (s) => `<span class="status ${s}">${ROTULOS[s] || esc(s)}</span>`;
+        const hora = (iso) => iso ? new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '—';
+        const minutosDesde = (iso) => Math.floor((Date.now() - Date.parse(iso)) / 60000);
+        const nomeResp = (id) => (lab.responsaveis.find(r => r.id === id) || {}).nome || id;
+        const emAberto = (p) => p.status === 'pendente' || p.status === 'sem_identificacao';
 
-        // CPF mascarado (S6): 123.***.***-00
-        const mascararCPF = (cpf) => cpf ? cpf.substring(0, 3) + '.***.***-' + cpf.slice(-2) : '—';
-
-        $('data').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
+        async function iniciar() {
+            lab = await Api.laboratorio();
+            if (lab.erro) { $('fila').innerHTML = `<p class="vazio">${esc(lab.mensagem)}</p>`; return; }
+            $('cabecalho-info').textContent = `${lab.nome} · Operador: ${OPERADOR}`;
+            await atualizar();
+            Api.aoMudar(atualizar);           // outra aba (a tela da porta) mudou os dados
+            setInterval(atualizar, 5000);     // prazos T1/T2 e tempo de espera
+        }
 
         async function atualizar() {
-            try {
-                const [fila, historico] = await Promise.all([Api.listarFila(), Api.listarHistorico()]);
-                visitantes = fila;
-                renderFila(fila);
-                renderDetalhes();
-                renderTabela(historico);
-            } catch (e) {
-                $('fila').innerHTML = '<p class="vazio">Não foi possível carregar a fila. (Abra pelo Live Server.)</p>';
+            const [lista, acessos, avisos, tela] = await Promise.all([Api.listarPedidos(), Api.listarAcessos(), Api.listarAvisos(), Api.statusTela()]);
+            if (lista.erro) return;
+            pedidos = lista;
+            renderFila();
+            renderDetalhes();
+            renderAcessos(acessos);
+            renderAvisos(avisos);
+            renderStatusTela(tela);
+        }
+
+        function filtrar(f) {
+            filtro = f;
+            document.querySelectorAll('.filtros button').forEach(b => b.classList.toggle('ativo', b.dataset.filtro === f));
+            renderFila();
+        }
+
+        /* ---------- Fila (RF28) ---------- */
+        function resumoCard(p) {
+            switch (p.status) {
+                case 'pendente': {
+                    const atual = p.notificados[p.notificados.length - 1];
+                    const quem = p.notificados.length > 2 ? 'todos os responsáveis' : nomeResp(atual.responsavel);
+                    return `Aguardando ${quem} · há ${minutosDesde(p.criado_em)} min`;
+                }
+                case 'sem_identificacao': return `Pessoa na porta chamou o atendente · há ${minutosDesde(p.criado_em)} min`;
+                case 'autorizado': return `Autorizado por ${nomeResp(p.decisao.por)} às ${hora(p.decisao.em)}`;
+                case 'negado': return `Negado por ${nomeResp(p.decisao.por)} às ${hora(p.decisao.em)}${p.contato ? ' · deixou contato' : ''}`;
+                case 'expirado': return `Sem resposta em ${lab.T2_min} min${p.contato ? ' · deixou contato' : ''}`;
+                case 'encerrado': return `Encerrado por ${p.encerramento.por}: ${p.encerramento.motivo}`;
+                case 'registrado': return 'Entrada registrada (modo apenas registro)';
+                default: return '';
             }
         }
 
-        // Gera os cards da fila: "Nome — hora" + status. Quem ainda espera aparece primeiro.
-        function renderFila(dados) {
-            const ordem = { aguardando: 0, em_aprovacao: 1, autorizado: 2, recusado: 2 };
-            const lista = dados.slice().sort((a, b) => (ordem[a.status] - ordem[b.status]) || a.hora_chegada.localeCompare(b.hora_chegada));
-            $('contador').textContent = `${dados.filter(v => v.status === 'aguardando').length} aguardando`;
-            $('fila').innerHTML = lista.length ? lista.map(v => `
-                <div class="card ${v.status} ${v.id === selecionado ? 'selecionado' : ''}" onclick="selecionar(${v.id})">
-                    <span><span class="nome">${esc(v.nome)}</span> <span class="hora">· ${esc(v.hora_chegada)}</span></span>
-                    ${etiqueta(v.status)}
-                </div>`).join('') : '<p class="vazio">Nenhum visitante na fila.</p>';
+        function renderFila() {
+            const abertos = pedidos.filter(emAberto);
+            $('contador-abertos').textContent = `${abertos.length} em aberto`;
+            const peso = (p) => p.status === 'sem_identificacao' ? 0 : p.status === 'pendente' ? 1 : 2;
+            const lista = (filtro === 'abertos' ? abertos : pedidos).slice().sort((a, b) => peso(a) - peso(b) || b.criado_em.localeCompare(a.criado_em));
+            if (!lista.length) {
+                $('fila').innerHTML = `<p class="vazio">${filtro === 'abertos' ? 'Nenhuma solicitação em aberto.' : 'Nenhuma solicitação hoje.'}</p>`;
+                return;
+            }
+            $('fila').innerHTML = lista.map(p => `
+                <div class="card ${p.status} ${p.id === selecionado ? 'selecionado' : ''}" onclick="selecionar('${p.id}')">
+                    <span class="nome">${esc(p.nome || 'Pessoa sem identificação')} <small class="suave">· ${hora(p.criado_em)}</small></span>
+                    <span class="status ${p.status}">${ROTULOS[p.status] || p.status}</span>
+                    <span class="sub">${esc(p.motivo ? p.motivo + ' — ' : '')}${esc(resumoCard(p))}</span>
+                </div>`).join('');
         }
 
-        // Ao abrir um visitante que estava aguardando, ele passa para "em aprovação".
-        async function selecionar(id) {
+        function selecionar(id) {
             selecionado = id;
-            const v = visitantes.find(x => x.id === id);
-            if (v && v.status === 'aguardando') await Api.mudarStatus(id, 'em_aprovacao');
-            atualizar();
+            $('sim-retorno').textContent = '';
+            renderFila();
+            renderDetalhes();
         }
 
+        /* ---------- Detalhes ---------- */
         function renderDetalhes() {
-            const v = visitantes.find(x => x.id === selecionado);
-            if (!v) return;
-            const decidido = v.status === 'autorizado' || v.status === 'recusado';
+            const p = pedidos.find(x => x.id === selecionado);
+            $('caixa-simulacao').hidden = !p || p.tipo !== 'visitante' || p.status === 'registrado';
+            if (!p) return;
+
+            const foto = p.foto
+                ? `<img src="${p.foto}" alt="Foto do visitante">`
+                : `<div class="sem-foto">${p.tipo === 'sem_identificacao' ? 'Sem identificação' : 'Sem foto (câmera indisponível)'}</div>`;
+
+            const tempo = [`<li>${hora(p.criado_em)} — pedido criado na tela da porta</li>`]
+                .concat(p.notificados.map((n, i) => `<li>${hora(n.em)} — ${i === 0 ? 'enviado a' : 'repassado a'} ${esc(nomeResp(n.responsavel))}</li>`));
+            if (p.decisao) tempo.push(`<li>${hora(p.decisao.em)} — ${p.status === 'autorizado' ? 'autorizado' : 'negado'} por ${esc(nomeResp(p.decisao.por))}${p.decisao.validade === 'dia' ? ' (válido até o fim do dia)' : p.decisao.validade ? ' (somente esta entrada)' : ''}${p.decisao.acao === 'negar_agendar' ? ' com sugestão de agendamento' : ''}</li>`);
+            if (p.expirado_em || p.status === 'expirado') tempo.push(`<li>${hora(p.expirado_em || new Date(Date.parse(p.criado_em) + lab.T2_min * 60000).toISOString())} — expirou sem resposta</li>`);
+            if (p.contato) tempo.push(`<li>${hora(p.contato.em)} — deixou contato: ${esc(p.contato.valor)}</li>`);
+            if (p.encerramento) tempo.push(`<li>${hora(p.encerramento.em)} — encerrado por ${esc(p.encerramento.por)}: ${esc(p.encerramento.motivo)}</li>`);
+
+            let acoes = '';
+            if (p.status === 'pendente') {
+                const telefones = p.notificados.map(n => lab.responsaveis.find(r => r.id === n.responsavel)).filter(Boolean)
+                    .map(r => `${esc(r.nome)}: ${esc(r.telefone)}`).join('<br>');
+                acoes = `<h3>O que fazer</h3><div class="aviso-regra">A decisão é do responsável (RN14). Se o pedido estiver parado, você pode telefonar:<br>${telefones}</div>`;
+            } else if (p.status === 'sem_identificacao') {
+                const sugestoes = ['Entrega recebida pela portaria', 'Pessoa atendida pessoalmente', 'Pessoa foi embora', 'Encaminhada à portaria do campus'];
+                acoes = `<h3>Encerrar pedido</h3>
+                    <div class="aviso-regra">Vá até a porta ou ligue para a portaria do bloco. Você não pode liberar a entrada desta pessoa; se ela quiser entrar, deve fazer o pedido como visitante.</div>
+                    <div class="sugestoes">${sugestoes.map(s => `<button onclick="document.getElementById('motivo-encerramento').value='${s}'">${s}</button>`).join('')}</div>
+                    <textarea id="motivo-encerramento" placeholder="Motivo do encerramento (obrigatório)"></textarea>
+                    <div class="botoes"><button onclick="encerrar('${p.id}')">Encerrar pedido</button></div>
+                    <div class="retorno" id="enc-retorno"></div>`;
+            }
+
+            // A tela é redesenhada a cada atualização: preserva o que o atendente já digitou.
+            const campo = $('motivo-encerramento');
+            const mesmo = $('detalhes').dataset.id === p.id;
+            if (campo && mesmo && document.activeElement === campo) return;
+            const rascunho = campo && mesmo ? campo.value : '';
+            $('detalhes').dataset.id = p.id;
             $('detalhes').innerHTML = `
-                <dl>
-                    <dt>Nome</dt><dd>${esc(v.nome)}</dd>
-                    <dt>CPF</dt><dd>${esc(mascararCPF(v.cpf))}</dd>
-                    <dt>Motivo</dt><dd>${esc(v.motivo)}</dd>
-                    <dt>Responsável</dt><dd>${esc(v.responsavel)}</dd>
-                    <dt>Chegada</dt><dd>${esc(v.hora_chegada)}</dd>
-                    <dt>Status</dt><dd>${etiqueta(v.status)}</dd>
-                </dl>
-                <div class="botoes">
-                    <button class="btn-aprovar" onclick="decidir(${v.id}, 'autorizado')" ${decidido ? 'disabled' : ''}>Aprovar</button>
-                    <button class="btn-recusar" onclick="decidir(${v.id}, 'recusado')" ${decidido ? 'disabled' : ''}>Recusar</button>
-                </div>`;
+                <div class="detalhe-topo">
+                    ${foto}
+                    <dl>
+                        <dt>Nome</dt><dd>${esc(p.nome || '—')}</dd>
+                        <dt>Motivo</dt><dd>${esc(p.motivo || '—')}</dd>
+                        <dt>Quer falar com</dt><dd>${esc(p.falar_com ? nomeResp(p.falar_com) : 'Qualquer responsável')}</dd>
+                        <dt>Chegada</dt><dd>${hora(p.criado_em)}</dd>
+                        <dt>Status</dt><dd><span class="status ${p.status}">${ROTULOS[p.status]}</span></dd>
+                    </dl>
+                </div>
+                <h3>Linha do tempo</h3>
+                <ul class="linha-tempo">${tempo.join('')}</ul>
+                ${acoes}`;
+            if (rascunho && $('motivo-encerramento')) $('motivo-encerramento').value = rascunho;
+
+            const sel = $('sim-resp');
+            const opcoes = (p.notificados.length ? p.notificados.map(n => n.responsavel) : lab.responsaveis.map(r => r.id));
+            if (sel.dataset.chave !== opcoes.join()) {
+                sel.innerHTML = opcoes.map(id => `<option value="${id}">${esc(nomeResp(id))}</option>`).join('');
+                sel.dataset.chave = opcoes.join();
+            }
         }
 
-        async function decidir(id, status) {
-            await Api.mudarStatus(id, status);
+        async function encerrar(id) {
+            const r = await Api.encerrarPedido(id, { operador: OPERADOR, motivo: $('motivo-encerramento').value });
+            if (r.erro) {
+                $('enc-retorno').className = 'retorno erro';
+                $('enc-retorno').textContent = r.mensagem;
+                return;
+            }
+            $('motivo-encerramento').blur();
             atualizar();
         }
 
-        function renderTabela(historico) {
-            $('tabela').innerHTML = historico.slice().reverse().map(h => `
-                <tr><td>${esc(h.nome)}</td><td>${esc(h.hora_entrada)}</td><td>${etiqueta(h.status)}</td></tr>`).join('');
+        async function simular(acao, validade) {
+            const r = await Api.simularDecisao(selecionado, { responsavel: $('sim-resp').value, acao, validade });
+            $('sim-retorno').className = 'retorno ' + (r.erro ? 'erro' : 'ok');
+            $('sim-retorno').textContent = r.erro
+                ? `Resposta no celular: “${r.mensagem}”${r.contato ? ' Contato deixado: ' + r.contato.valor : ''}`
+                : `Decisão registrada: ${ROTULOS[r.status]}.`;
+            atualizar();
         }
 
-        Api.aoMudar(atualizar);   // o tablet cadastrou alguém em outra aba
-        atualizar();
+        /* ---------- Acessos (RF03, RF04, RF21) ---------- */
+        function renderAcessos(acessos) {
+            if (acessos.erro) return;
+            const dentro = acessos.filter(a => !a.saida);
+            $('presentes').innerHTML = dentro.length
+                ? dentro.map(a => `<span title="desde ${hora(a.entrada)}">${esc(a.pessoa.nome)}</span>`).join('')
+                : '<p class="vazio">Ninguém registrado no momento.</p>';
+            $('tabela-historico').innerHTML = acessos.map(a => `
+                <tr>
+                    <td>${esc(a.pessoa.nome)}</td>
+                    <td>${PERFIS[a.pessoa.perfil] || esc(a.pessoa.perfil)}</td>
+                    <td>${hora(a.entrada)}</td>
+                    <td>${a.saida ? hora(a.saida) : '<em>no laboratório</em>'}</td>
+                    <td>${ORIGENS[a.origem] || esc(a.origem)}${a.autorizado_por ? ` <small>por ${esc(a.autorizado_por)}</small>` : ''}${a.justificativa ? `<small>“${esc(a.justificativa)}”</small>` : ''}</td>
+                </tr>`).join('');
+        }
+
+        function renderAvisos(avisos) {
+            if (avisos.erro) return;
+            const para = (id) => id === 'atendente' ? 'Atendente' : nomeResp(id);
+            $('avisos').innerHTML = avisos.length
+                ? avisos.slice(0, 15).map(a => `<li>${hora(a.em)} → <b>${esc(para(a.para))}</b>: ${esc(a.texto)}</li>`).join('')
+                : '<li class="vazio">Nenhum aviso enviado hoje.</li>';
+        }
+
+        function renderStatusTela(t) {
+            const el = $('status-tela');
+            if (t.erro) { el.className = 'pilula offline'; el.textContent = 'Servidor sem comunicação'; return; }
+            el.className = 'pilula ' + (t.online ? 'online' : 'offline');
+            el.textContent = t.online ? 'Tela da porta: online'
+                : t.ultimo_sinal ? `Tela da porta sem comunicação desde ${hora(t.ultimo_sinal)}` : 'Tela da porta: sem sinal hoje';
+        }
+
+        /* ---------- Liberação manual (RF29) ---------- */
+        function abrirLiberacao() {
+            $('lib-matricula').value = '';
+            $('lib-justificativa').value = '';
+            $('lib-retorno').textContent = '';
+            $('dlg-liberacao').showModal();
+        }
+
+        async function confirmarLiberacao() {
+            const r = await Api.liberacaoManual({ matricula: $('lib-matricula').value, justificativa: $('lib-justificativa').value, operador: OPERADOR });
+            if (r.erro) {
+                $('lib-retorno').className = 'retorno erro';
+                $('lib-retorno').textContent = r.mensagem;
+                return;
+            }
+            $('lib-retorno').className = 'retorno ok';
+            $('lib-retorno').textContent = `Liberado: ${r.pessoa.nome} às ${hora(r.entrada)}. O responsável foi avisado.`;
+            atualizar();
+            setTimeout(() => $('dlg-liberacao').close(), 1800);
+        }
+
+        iniciar();
     </script>
 </body>
 </html>

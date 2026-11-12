@@ -10,17 +10,19 @@
         * { cursor: none; box-sizing: border-box; }
         body.mostrar-cursor * { cursor: auto; }   /* ?cursor=1 para testar no computador */
         body { font-size: 20px; }
-        input, button, select { font-size: 1.2rem; min-height: 60px; font-family: inherit; }
+        input, button { font-size: 1.2rem; min-height: 60px; font-family: inherit; }
 
         :root {
             --primaria: #004c97;
             --primaria-escura: #003a75;
             --fundo: #eef2f7;
+            --cartao: #ffffff;
             --texto: #1c2430;
             --suave: #4f5b6b;
             --borda: #c9d2de;
             --ok: #1e7e34;
             --erro: #c62828;
+            --alerta: #a35a00;
         }
 
         body {
@@ -29,223 +31,654 @@
             color: var(--texto);
             display: flex;
             flex-direction: column;
+            -webkit-user-select: none;
             user-select: none;
         }
 
         header {
-            height: 72px; flex: none;
-            display: flex; align-items: center; justify-content: space-between;
+            height: 72px;
+            flex: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             padding: 0 32px;
-            background: var(--primaria); color: #fff;
+            background: var(--primaria);
+            color: #fff;
         }
         header .marca { font-weight: 700; font-size: 1.3rem; }
+        header .marca small { font-weight: 400; opacity: .85; margin-left: 8px; }
         header .relogio { font-size: 1.3rem; font-variant-numeric: tabular-nums; }
 
-        main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; min-height: 0; }
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            min-height: 0;
+        }
 
-        /* Cada passo do wizard é mostrado/escondido com display: block/none */
-        .passo {
+        /* Cada tela é mostrada/escondida com display: block/none */
+        .tela {
             display: none;
-            width: 100%; max-width: 900px; max-height: 100%;
-            background: #fff; border-radius: 20px;
-            padding: 40px 48px;
+            width: 100%;
+            max-width: 860px;
+            max-height: 100%;
+            background: var(--cartao);
+            border-radius: 20px;
+            padding: 36px 44px;
             box-shadow: 0 6px 24px rgba(0, 40, 90, .10);
         }
-        .passo.ativo { display: block; }
+        .tela.ativa { display: block; }
 
-        h1 { font-size: 3rem; margin: 0 0 12px; }
-        h2 { font-size: 2rem; margin: 0 0 8px; }
+        h1 { font-size: 2rem; margin: 0 0 8px; }
+        h2 { font-size: 1.6rem; margin: 0 0 8px; }
         p { margin: 0 0 16px; line-height: 1.4; }
-        .centro { text-align: center; }
         .suave { color: var(--suave); }
+        .centro { text-align: center; }
 
+        .passos { color: var(--suave); font-size: .9rem; margin-bottom: 6px; letter-spacing: .03em; text-transform: uppercase; }
+
+        /* Botões */
         button {
-            border: none; border-radius: 12px;
-            padding: 0 32px; font-weight: 600;
-            background: var(--primaria); color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 0 28px;
+            font-weight: 600;
+            background: var(--primaria);
+            color: #fff;
         }
         button:active { background: var(--primaria-escura); }
         button.secundario { background: #e3e8ef; color: var(--texto); }
-        button.grande { min-height: 88px; font-size: 1.5rem; padding: 0 56px; margin-top: 28px; }
-
-        /* Formulário: 2 colunas como no wireframe (Nome | Motivo / CPF | Responsável) */
-        .campos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 28px; margin-top: 16px; }
-        label { display: block; font-weight: 600; margin: 12px 0 8px; }
-        input, select {
-            width: 100%; padding: 0 18px;
-            border: 2px solid var(--borda); border-radius: 12px;
-            background: #fff; color: var(--texto);
-        }
-        input:focus, select:focus { outline: none; border-color: var(--primaria); box-shadow: 0 0 0 3px rgba(0, 76, 151, .2); }
-        input.invalido, select.invalido { border-color: var(--erro); }
-        .erro { color: var(--erro); font-weight: 600; min-height: 1.4em; margin: 16px 0 0; }
-        .acoes { display: flex; gap: 16px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
+        button.ok { background: var(--ok); }
+        button.link { background: none; color: var(--primaria); text-decoration: underline; padding: 0 8px; }
+        .acoes { display: flex; gap: 16px; justify-content: flex-end; margin-top: 24px; flex-wrap: wrap; }
+        .acoes.centro { justify-content: center; }
         .acoes button { min-width: 180px; }
 
-        .icone-ok {
-            width: 104px; height: 104px; border-radius: 50%;
-            margin: 0 auto 20px; background: var(--ok); color: #fff;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 3.4rem; font-weight: 700;
+        /* Tela inicial */
+        .escolhas { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 28px; }
+        .escolha {
+            min-height: 200px;
+            border-radius: 18px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+            font-size: 1.6rem;
         }
-        .hora-entrada { font-size: 1.4rem; font-weight: 700; color: var(--primaria); }
+        .escolha span { font-size: 1rem; font-weight: 400; opacity: .9; }
+        .escolha.visitante { background: #fff; color: var(--primaria); border: 3px solid var(--primaria); }
+        .rodape-inicio { margin-top: 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; font-size: .85rem; }
 
-        /* Tablet em retrato (800×1280): uma coluna */
+        /* Formulário */
+        label { display: block; font-weight: 600; margin: 18px 0 8px; }
+        label .opcional { font-weight: 400; color: var(--suave); }
+        input[type=text], input[type=email], input[type=tel] {
+            width: 100%;
+            padding: 0 18px;
+            border: 2px solid var(--borda);
+            border-radius: 12px;
+            color: var(--texto);
+            background: #fff;
+        }
+        input:focus { outline: none; border-color: var(--primaria); box-shadow: 0 0 0 3px rgba(0, 76, 151, .2); }
+        .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+        .chip {
+            min-height: 60px;
+            padding: 0 20px;
+            font-size: 1.05rem;
+            font-weight: 500;
+            background: #fff;
+            color: var(--texto);
+            border: 2px solid var(--borda);
+        }
+        .chip.selecionado { background: #e3eefa; border-color: var(--primaria); color: var(--primaria); font-weight: 700; }
+        .erro-campo { color: var(--erro); font-weight: 600; min-height: 1.4em; margin: 10px 0 0; }
+
+        /* Foto */
+        .foto-area { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; justify-content: center; }
+        .foto-quadro {
+            width: 400px; max-width: 100%; aspect-ratio: 4 / 3;
+            background: #1c2430; border-radius: 14px; overflow: hidden;
+            display: flex; align-items: center; justify-content: center; color: #fff; text-align: center; padding: 0;
+        }
+        .foto-quadro video, .foto-quadro img { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        .foto-lado { flex: 1; min-width: 260px; }
+        .foto-lado button { width: 100%; margin-bottom: 12px; }
+
+        /* Resumo */
+        .resumo { display: flex; gap: 24px; align-items: flex-start; background: #f5f7fa; border-radius: 14px; padding: 20px; margin-top: 12px; }
+        .resumo img, .resumo .sem-foto { width: 160px; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; transform: scaleX(-1); flex: none; }
+        .resumo .sem-foto { transform: none; background: #dde3eb; display: flex; align-items: center; justify-content: center; color: var(--suave); font-size: .9rem; }
+        .resumo dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; }
+        .resumo dt { color: var(--suave); }
+        .resumo dd { margin: 0; font-weight: 600; }
+
+        /* Mensagens / status */
+        .icone {
+            width: 96px; height: 96px; border-radius: 50%;
+            margin: 0 auto 18px; display: flex; align-items: center; justify-content: center;
+            font-size: 3rem; font-weight: 700; color: #fff; background: var(--primaria);
+        }
+        .icone.ok { background: var(--ok); }
+        .icone.erro { background: var(--erro); }
+        .icone.alerta { background: var(--alerta); }
+        .icone.espera { background: #fff; border: 8px solid #d6e2f0; border-top-color: var(--primaria); animation: gira 1.1s linear infinite; }
+        @keyframes gira { to { transform: rotate(360deg); } }
+        .destaque { font-size: 1.15rem; background: #fff6e5; border-left: 6px solid var(--alerta); padding: 12px 16px; border-radius: 8px; text-align: left; }
+        .contagem { font-size: 2.2rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--primaria); }
+
+        /* Credencial */
+        .credencial { display: grid; grid-template-columns: 1fr 300px; gap: 36px; align-items: start; }
+        .pin-visor { display: flex; gap: 12px; margin: 4px 0 0; }
+        .pin-visor span { width: 44px; height: 56px; border: 2px solid var(--borda); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+        .teclado { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .teclado button { min-height: 64px; font-size: 1.5rem; background: #e3e8ef; color: var(--texto); padding: 0; }
+        .teclado button.ok { background: var(--ok); color: #fff; font-size: 1.1rem; }
+        .teclado button.apagar { font-size: 1.05rem; }
+
+        .privacidade ul { margin: 8px 0 0; padding-left: 24px; line-height: 1.5; }
+
+        /* Retrato (800×1280) */
         @media (max-aspect-ratio: 1/1) {
-            .campos { grid-template-columns: 1fr; }
+            .credencial { grid-template-columns: 1fr; }
+            .escolhas { grid-template-columns: 1fr; }
+            .escolha { min-height: 160px; }
+        }
+        /* Paisagem baixa (1280×800): telas mais compactas */
+        @media (max-height: 820px) and (min-aspect-ratio: 1/1) {
+            .tela { padding: 26px 36px; }
+            label { margin-top: 12px; }
+            .acoes { margin-top: 16px; }
         }
     </style>
 </head>
 <body>
     <header>
-        <div class="marca">Porteiro Digital</div>
+        <div class="marca">Porteiro Digital <small id="nome-lab">Laboratório</small></div>
         <div class="relogio" id="relogio">--:--</div>
     </header>
 
     <main>
-        <!-- Estado 1: boas-vindas -->
-        <section class="passo ativo centro" id="passo1">
-            <h1>Bem-vindo!</h1>
-            <p class="suave">Registre sua visita para entrar.</p>
-            <button class="grande" onclick="irPara(2)">Toque aqui para iniciar</button>
+        <!-- Tela inicial (cenário 1, passo 1) -->
+        <section class="tela ativa" id="t-inicio">
+            <h1 class="centro">Bem-vindo ao <span class="lab"></span></h1>
+            <p class="centro suave">Toque em uma opção para começar.</p>
+            <div class="escolhas">
+                <button class="escolha" onclick="irCredencial()">Tenho cadastro<span>Aluno ou servidor do Ifes</span></button>
+                <button class="escolha visitante" onclick="irPara('t-privacidade')">Sou visitante<span>Quero pedir para entrar</span></button>
+            </div>
+            <div class="rodape-inicio suave">
+                <span>Seus dados são usados apenas para o controle de acesso (LGPD).</span>
+                <button class="link" onclick="chamarAtendente()">Preciso de ajuda: chamar atendente</button>
+            </div>
         </section>
 
-        <!-- Estado 2: formulário (Nome, CPF, Motivo, Responsável) -->
-        <section class="passo" id="passo2">
-            <h2>Seus dados</h2>
-            <p class="suave">Preencha todos os campos e toque em Avançar.</p>
-            <div class="campos">
-                <div>
-                    <label for="nome">Nome completo</label>
-                    <input type="text" id="nome" autocomplete="off" maxlength="80">
-                </div>
-                <div>
-                    <label for="motivo">Motivo da visita</label>
-                    <input type="text" id="motivo" autocomplete="off" maxlength="120">
-                </div>
-                <div>
-                    <label for="cpf">CPF</label>
-                    <input type="text" id="cpf" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00">
-                </div>
-                <div>
-                    <label for="responsavel">Responsável a visitar</label>
-                    <select id="responsavel"><option value="">Carregando…</option></select>
-                </div>
-            </div>
-            <p class="erro" id="erro"></p>
+        <!-- Aviso de privacidade (cenário 1, passo 2) -->
+        <section class="tela privacidade" id="t-privacidade">
+            <h2>Antes de começar</h2>
+            <p>Para pedir sua entrada, vamos pedir seu <strong>nome</strong>, o <strong>motivo da visita</strong> e tirar uma <strong>foto</strong>.</p>
+            <ul>
+                <li>A foto serve só para o responsável ver quem está pedindo para entrar.</li>
+                <li>Ela <strong>não</strong> é usada para reconhecimento facial.</li>
+                <li>A foto e os dados da visita são apagados após o prazo de retenção (<span id="prazo-p">a definir</span>).</li>
+                <li>Você não precisa criar conta.</li>
+            </ul>
             <div class="acoes">
+                <button class="link" onclick="chamarAtendente()">Não quero me identificar</button>
                 <button class="secundario" onclick="reiniciar()">Voltar</button>
-                <button id="btn-avancar" onclick="enviar()">Avançar</button>
+                <button onclick="irPara('t-dados')">Entendi, continuar</button>
             </div>
         </section>
 
-        <!-- Estado 3: registro concluído -->
-        <section class="passo centro" id="passo3">
-            <div class="icone-ok">✓</div>
-            <h2>Registro concluído!</h2>
-            <p class="suave">Aguarde a autorização na recepção.</p>
-            <p>Hora de entrada: <span class="hora-entrada" id="hora-entrada">--:--</span></p>
+        <!-- Passo 1 de 3: dados (RF10) -->
+        <section class="tela" id="t-dados">
+            <div class="passos">Passo 1 de 3</div>
+            <h2>Quem é você e o que deseja?</h2>
+
+            <label for="nome">Nome completo</label>
+            <input type="text" id="nome" autocomplete="off" maxlength="80">
+
+            <label>Motivo da visita</label>
+            <div class="chips" id="motivos"></div>
+            <input type="text" id="motivo-outro" placeholder="Escreva o motivo" maxlength="120" style="margin-top:10px" hidden>
+
+            <label>Com quem deseja falar? <span class="opcional">(opcional)</span></label>
+            <div class="chips" id="responsaveis"></div>
+
+            <p class="erro-campo" id="erro-dados"></p>
             <div class="acoes">
-                <button onclick="reiniciar()">Sair</button>
+                <button class="secundario" onclick="irPara('t-privacidade')">Voltar</button>
+                <button onclick="validarDados()">Próximo</button>
             </div>
+        </section>
+
+        <!-- Passo 2 de 3: foto (RF16) -->
+        <section class="tela" id="t-foto">
+            <div class="passos">Passo 2 de 3</div>
+            <h2>Foto para o responsável</h2>
+            <div class="foto-area">
+                <div class="foto-quadro" id="foto-quadro">
+                    <video id="video" autoplay playsinline muted></video>
+                    <img id="foto-preview" alt="Sua foto" hidden>
+                    <span id="camera-msg" hidden></span>
+                </div>
+                <div class="foto-lado">
+                    <p class="suave" id="foto-instrucao">Olhe para a câmera e toque em “Tirar foto”.</p>
+                    <button id="btn-tirar" onclick="tirarFoto()">Tirar foto</button>
+                    <button id="btn-usar" class="ok" onclick="irPara('t-confirmar')" hidden>Usar esta foto</button>
+                    <button id="btn-outra" class="secundario" onclick="tirarOutra()" hidden>Tirar outra</button>
+                    <button id="btn-sem-camera" class="secundario" onclick="continuarSemCamera()" hidden>Continuar sem foto</button>
+                    <button class="link" onclick="chamarAtendente()">Prefiro não tirar foto</button>
+                </div>
+            </div>
+            <div class="acoes">
+                <button class="secundario" onclick="irPara('t-dados')">Voltar</button>
+            </div>
+        </section>
+
+        <!-- Passo 3 de 3: confirmação -->
+        <section class="tela" id="t-confirmar">
+            <div class="passos">Passo 3 de 3</div>
+            <h2>Confira seu pedido</h2>
+            <div class="resumo" id="resumo"></div>
+            <p class="erro-campo" id="erro-envio"></p>
+            <div class="acoes">
+                <button class="secundario" onclick="irPara('t-foto')">Voltar</button>
+                <button class="ok" id="btn-enviar" onclick="enviarPedido()">Enviar pedido</button>
+            </div>
+        </section>
+
+        <!-- Aguardando decisão (RF25) -->
+        <section class="tela centro" id="t-aguardando">
+            <div class="icone espera"></div>
+            <h2 id="ag-titulo">Pedido enviado ao responsável</h2>
+            <p class="suave" id="ag-texto"></p>
+            <p class="destaque" id="ag-repasse" hidden></p>
+            <p class="suave" style="margin:12px 0 0">Tempo restante</p>
+            <div class="contagem" id="ag-contagem">--:--</div>
+        </section>
+
+        <!-- Deixar contato (RF26) -->
+        <section class="tela" id="t-contato">
+            <h2>Deixe seu contato</h2>
+            <p class="suave">O responsável vai usar este contato só para combinar uma visita.</p>
+            <label for="contato">E-mail ou telefone</label>
+            <input type="text" id="contato" autocomplete="off" maxlength="80">
+            <p class="erro-campo" id="erro-contato"></p>
+            <div class="acoes">
+                <button class="secundario" onclick="reiniciar()">Cancelar</button>
+                <button class="ok" onclick="enviarContato()">Enviar contato</button>
+            </div>
+        </section>
+
+        <!-- Usuário cadastrado (RF01, cenário 4) -->
+        <section class="tela" id="t-credencial">
+            <h2>Entrar com sua credencial</h2>
+            <div class="credencial">
+                <div>
+                    <label for="matricula">Matrícula ou SIAPE</label>
+                    <input type="text" id="matricula" autocomplete="off" maxlength="20">
+                    <label>PIN</label>
+                    <div class="pin-visor" id="pin-visor"></div>
+                    <p class="erro-campo" id="erro-cred"></p>
+                    <div class="acoes" style="justify-content:flex-start">
+                        <button class="secundario" onclick="reiniciar()">Voltar</button>
+                    </div>
+                </div>
+                <div class="teclado" id="teclado"></div>
+            </div>
+        </section>
+
+        <!-- Mensagem genérica (resultado, erros, bloqueios) -->
+        <section class="tela centro" id="t-mensagem">
+            <div class="icone" id="msg-icone"></div>
+            <h2 id="msg-titulo"></h2>
+            <p class="suave" id="msg-texto"></p>
+            <div class="acoes centro" id="msg-acoes"></div>
         </section>
     </main>
 
     <script src="../js/api.js"></script>
     <script>
-        const INATIVIDADE_MS = 2 * 60 * 1000;   // volta ao início se ninguém mexer
-        const VOLTA_AUTOMATICA_MS = 15 * 1000;  // depois do "Registro concluído"
+        const INATIVIDADE_MS = 2 * 60 * 1000;   // cenário 1, fluxo 1.a
+        const TAMANHO_PIN = 4;
 
-        let passoAtual = 1;
+        let lab = null;
+        let telaAtual = 't-inicio';
         let ultimoToque = Date.now();
-        let temporizador = null;
+        let temporizadorVolta = null;
+        let visita = {};          // { nome, motivo, motivoTexto, falarCom, foto, semFoto }
+        let pedidoId = null;
+        let stream = null;
+        let pin = '';
+
         const $ = (id) => document.getElementById(id);
-        const horaAtual = () => new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const esc = (t) => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const hora = (iso) => new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
         if (new URLSearchParams(location.search).has('cursor')) document.body.classList.add('mostrar-cursor');
 
-        function irPara(n) {
-            clearTimeout(temporizador);
-            $('passo' + passoAtual).classList.remove('ativo');
-            $('passo' + n).classList.add('ativo');
-            passoAtual = n;
-            if (n === 2) $('nome').focus();
-            if (n === 3) temporizador = setTimeout(reiniciar, VOLTA_AUTOMATICA_MS);
+        /* ---------- Navegação ---------- */
+        function irPara(id) {
+            clearTimeout(temporizadorVolta);
+            if (telaAtual === 't-foto' && id !== 't-foto') pararCamera();
+            document.querySelectorAll('.tela').forEach(t => t.classList.toggle('ativa', t.id === id));
+            telaAtual = id;
+            if (id === 't-foto') abrirCamera();
+            if (id === 't-confirmar') montarResumo();
+            const foco = document.querySelector(`#${id} input:not([hidden])`);
+            if (foco && id !== 't-credencial') foco.focus();
         }
 
         function reiniciar() {
-            ['nome', 'cpf', 'motivo', 'responsavel'].forEach(id => { $(id).value = ''; $(id).classList.remove('invalido'); });
-            $('erro').textContent = '';
-            irPara(1);
+            pararCamera();
+            visita = {};
+            pedidoId = null;
+            pin = '';
+            ['nome', 'motivo-outro', 'contato', 'matricula'].forEach(i => $(i).value = '');
+            $('motivo-outro').hidden = true;
+            document.querySelectorAll('.chip.selecionado').forEach(c => c.classList.remove('selecionado'));
+            document.querySelectorAll('.erro-campo').forEach(e => e.textContent = '');
+            desenharPin();
+            irPara('t-inicio');
         }
 
-        /* Responsáveis vêm da API (anotação do wireframe) */
-        async function carregarResponsaveis() {
+        function mensagem({ tipo = 'info', titulo, texto = '', botoes = [], voltarEm = 15 }) {
+            const simbolos = { ok: '✓', erro: '✕', alerta: '!', info: 'i' };
+            $('msg-icone').className = 'icone ' + tipo;
+            $('msg-icone').textContent = simbolos[tipo] || 'i';
+            $('msg-titulo').textContent = titulo;
+            $('msg-texto').textContent = texto;
+            const acoes = $('msg-acoes');
+            acoes.innerHTML = '';
+            botoes.forEach(b => {
+                const el = document.createElement('button');
+                el.textContent = b.texto;
+                if (b.classe) el.className = b.classe;
+                el.onclick = b.acao;
+                acoes.appendChild(el);
+            });
+            irPara('t-mensagem');
+            if (voltarEm) temporizadorVolta = setTimeout(reiniciar, voltarEm * 1000);
+        }
+
+        const botaoInicio = { texto: 'Voltar ao início', classe: 'secundario', acao: reiniciar };
+
+        /* ---------- Inicialização ---------- */
+        async function iniciar() {
             try {
-                const lista = await Api.listarResponsaveis();
-                $('responsavel').innerHTML = '<option value="">Escolha…</option>' +
-                    lista.map(r => `<option>${r.nome.replace(/</g, '&lt;')}</option>`).join('');
+                lab = await Api.laboratorio();
+                if (lab.erro) throw new Error(lab.mensagem);
             } catch (e) {
-                $('responsavel').innerHTML = '<option value="">Sem conexão</option>';
+                mensagem({ tipo: 'alerta', titulo: 'Sem conexão com o servidor', texto: 'Procure a portaria do campus ou a Diretoria de Pesquisa. (Dica para testes: abra esta página pelo Live Server.)', voltarEm: 0 });
+                setTimeout(() => location.reload(), 30000);   // tenta de novo sozinha
+                return;
             }
+            $('nome-lab').textContent = lab.nome;
+            document.querySelectorAll('.lab').forEach(e => e.textContent = lab.nome);
+            $('prazo-p').textContent = lab.prazo_retencao_foto;
+            montarChips('motivos', [...lab.motivos.map(m => ({ valor: m, texto: m })), { valor: '__outro', texto: 'Outro' }], escolherMotivo);
+            montarChips('responsaveis', [...lab.responsaveis.map(r => ({ valor: r.id, texto: r.nome })), { valor: '', texto: 'Não sei' }], escolherResponsavel);
+            montarTeclado();
+            Api.sinalTela();
+            setInterval(Api.sinalTela, 10000);   // o painel do atendente sabe se a tela está online
         }
 
-        /* Máscara do CPF enquanto digita: 000.000.000-00 */
-        $('cpf').addEventListener('input', () => {
-            const d = $('cpf').value.replace(/\D/g, '').slice(0, 11);
-            $('cpf').value = d.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-        });
-
-        function cpfValido(cpf) {
-            const d = cpf.replace(/\D/g, '');
-            if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
-            for (let t = 9; t < 11; t++) {
-                let soma = 0;
-                for (let i = 0; i < t; i++) soma += d[i] * (t + 1 - i);
-                if (((soma * 10) % 11) % 10 !== Number(d[t])) return false;
-            }
-            return true;
+        function montarChips(id, itens, aoEscolher) {
+            const box = $(id);
+            box.innerHTML = '';
+            itens.forEach(item => {
+                const b = document.createElement('button');
+                b.className = 'chip';
+                b.textContent = item.texto;
+                b.onclick = () => {
+                    box.querySelectorAll('.chip').forEach(c => c.classList.remove('selecionado'));
+                    b.classList.add('selecionado');
+                    aoEscolher(item.valor);
+                };
+                box.appendChild(b);
+            });
         }
 
-        function validar() {
-            const erros = [];
-            const marcar = (id, ok, msg) => { $(id).classList.toggle('invalido', !ok); if (!ok) erros.push(msg); };
-            marcar('nome', $('nome').value.trim().length >= 3, 'informe o nome completo');
-            marcar('cpf', cpfValido($('cpf').value), 'CPF inválido');
-            marcar('motivo', $('motivo').value.trim().length > 0, 'informe o motivo');
-            marcar('responsavel', $('responsavel').value !== '', 'escolha o responsável');
-            $('erro').textContent = erros.length ? 'Verifique: ' + erros.join(', ') + '.' : '';
-            return erros.length === 0;
+        function escolherMotivo(valor) {
+            visita.motivo = valor;
+            $('motivo-outro').hidden = valor !== '__outro';
+            if (valor === '__outro') $('motivo-outro').focus();
+        }
+        function escolherResponsavel(valor) { visita.falarCom = valor || null; }
+
+        /* ---------- Visitante ---------- */
+        function validarDados() {
+            const nome = $('nome').value.trim();
+            const motivo = visita.motivo === '__outro' ? $('motivo-outro').value.trim() : visita.motivo;
+            if (nome.length < 3) return $('erro-dados').textContent = 'Informe seu nome completo.';
+            if (!motivo) return $('erro-dados').textContent = 'Escolha ou escreva o motivo da visita.';
+            $('erro-dados').textContent = '';
+            visita.nome = nome;
+            visita.motivoTexto = motivo;
+            irPara('t-foto');
         }
 
-        async function enviar() {
-            if (!validar()) return;
-            const hora = horaAtual();               // hora de entrada calculada pelo frontend
-            $('btn-avancar').disabled = true;
+        async function abrirCamera() {
+            mostrarEstadoFoto(visita.foto ? 'preview' : 'video');
+            if (visita.foto) return;
             try {
-                await Api.criarVisitante({
-                    nome: $('nome').value.trim(),
-                    cpf: $('cpf').value,
-                    motivo: $('motivo').value.trim(),
-                    responsavel: $('responsavel').value,
-                    hora_chegada: hora
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 } });
+                $('video').srcObject = stream;
+            } catch (e) {
+                // Falha técnica (sem câmera / sem permissão). Recusa da foto vai para "chamar atendente".
+                mostrarEstadoFoto('sem-camera');
+            }
+        }
+
+        function pararCamera() {
+            if (stream) stream.getTracks().forEach(t => t.stop());
+            stream = null;
+        }
+
+        function mostrarEstadoFoto(estado) {
+            $('video').hidden = estado !== 'video';
+            $('foto-preview').hidden = estado !== 'preview';
+            $('camera-msg').hidden = estado !== 'sem-camera';
+            $('btn-tirar').hidden = estado !== 'video';
+            $('btn-usar').hidden = $('btn-outra').hidden = estado !== 'preview';
+            $('btn-sem-camera').hidden = estado !== 'sem-camera';
+            $('camera-msg').textContent = 'Câmera indisponível no momento.';
+            $('foto-instrucao').textContent = {
+                video: 'Olhe para a câmera e toque em “Tirar foto”.',
+                preview: 'A foto ficou boa? Você pode usar esta ou tirar outra.',
+                'sem-camera': 'A câmera não está funcionando. Você pode enviar o pedido sem foto.'
+            }[estado];
+        }
+
+        function tirarFoto() {
+            const video = $('video');
+            if (!video.videoWidth) return;
+            const canvas = document.createElement('canvas');
+            canvas.width = 320;
+            canvas.height = 240;
+            canvas.getContext('2d').drawImage(video, 0, 0, 320, 240);
+            visita.foto = canvas.toDataURL('image/jpeg', 0.7);
+            visita.semFoto = false;
+            $('foto-preview').src = visita.foto;
+            pararCamera();
+            mostrarEstadoFoto('preview');
+        }
+
+        function tirarOutra() {
+            visita.foto = null;
+            abrirCamera();
+        }
+
+        function continuarSemCamera() {
+            visita.foto = null;
+            visita.semFoto = true;
+            irPara('t-confirmar');
+        }
+
+        function montarResumo() {
+            const resp = lab.responsaveis.find(r => r.id === visita.falarCom);
+            $('resumo').innerHTML = `
+                ${visita.foto ? `<img src="${visita.foto}" alt="Sua foto">` : '<div class="sem-foto">Sem foto</div>'}
+                <dl>
+                    <dt>Nome</dt><dd>${esc(visita.nome)}</dd>
+                    <dt>Motivo</dt><dd>${esc(visita.motivoTexto)}</dd>
+                    <dt>Falar com</dt><dd>${esc(resp ? resp.nome : 'Qualquer responsável')}</dd>
+                </dl>`;
+            $('erro-envio').textContent = '';
+        }
+
+        async function enviarPedido() {
+            $('btn-enviar').disabled = true;
+            const r = await Api.criarPedido({ nome: visita.nome, motivo: visita.motivoTexto, falar_com: visita.falarCom, foto: visita.foto || null });
+            $('btn-enviar').disabled = false;
+            if (r.erro === 'bloqueado') return mensagem({ tipo: 'erro', titulo: 'Acesso bloqueado', texto: 'Procure a coordenação do laboratório.', botoes: [botaoInicio] });
+            if (r.erro) return $('erro-envio').textContent = r.mensagem || 'Não foi possível enviar. Tente de novo.';
+            if (r.status === 'registrado') {
+                return mensagem({ tipo: 'ok', titulo: 'Entrada registrada', texto: 'Pode entrar. Obrigado!', voltarEm: 8 });
+            }
+            pedidoId = r.id;
+            irPara('t-aguardando');
+            acompanharPedido();
+        }
+
+        async function chamarAtendente() {
+            pararCamera();
+            const r = await Api.chamarAtendente();
+            if (r.erro) return mensagem({ tipo: 'alerta', titulo: 'Sem conexão com o servidor', texto: 'Procure a portaria do campus.', botoes: [botaoInicio] });
+            pedidoId = r.id;
+            irPara('t-aguardando');
+            acompanharPedido();
+        }
+
+        /* Acompanha o pedido enquanto a tela "aguardando" estiver aberta (RF25). */
+        async function acompanharPedido() {
+            if (telaAtual !== 't-aguardando' || !pedidoId) return;
+            const p = await Api.obterPedido(pedidoId);
+            if (p.erro) return;
+            const nomeResp = (id) => (lab.responsaveis.find(r => r.id === id) || {}).nome || 'o responsável';
+            const contato = { texto: 'Deixar meu contato', acao: () => irPara('t-contato') };
+            const naoObrigado = { texto: 'Não, obrigado', classe: 'secundario', acao: reiniciar };
+
+            if (p.status === 'pendente' || p.status === 'sem_identificacao') {
+                const fim = Date.parse(p.criado_em) + lab.T2_min * 60000;
+                const resta = Math.max(0, fim - Date.now());
+                $('ag-contagem').textContent = `${String(Math.floor(resta / 60000)).padStart(2, '0')}:${String(Math.floor(resta / 1000) % 60).padStart(2, '0')}`;
+                if (p.tipo === 'sem_identificacao') {
+                    $('ag-titulo').textContent = 'Um atendente foi avisado';
+                    $('ag-texto').textContent = 'Aguarde aqui. Alguém vai falar com você.';
+                    $('ag-repasse').hidden = true;
+                } else {
+                    $('ag-titulo').textContent = 'Pedido enviado ao responsável';
+                    $('ag-texto').textContent = `Tempo estimado de resposta: até ${lab.T2_min} minutos.`;
+                    $('ag-repasse').hidden = p.notificados.length < 2;
+                    $('ag-repasse').textContent = 'O responsável não respondeu. Seu pedido foi encaminhado a outra pessoa.';
+                }
+                return;
+            }
+
+            if (p.status === 'autorizado') {
+                const dia = p.decisao.validade === 'dia' ? ' Você pode entrar e sair até o fim do dia.' : '';
+                mensagem({ tipo: 'ok', titulo: `Entrada autorizada por ${nomeResp(p.decisao.por)}`, texto: 'Aguarde: a porta será aberta por quem está no laboratório.' + dia });
+            } else if (p.status === 'negado') {
+                // Cenário 3A: a tela não informa quem negou.
+                const agendar = p.decisao.acao === 'negar_agendar';
+                mensagem({
+                    tipo: 'erro', titulo: 'No momento não é possível entrar.',
+                    texto: agendar ? 'Deseja deixar seu contato para agendar uma visita?' : '',
+                    botoes: agendar ? [contato, naoObrigado] : [botaoInicio], voltarEm: agendar ? 45 : 12
                 });
-                $('hora-entrada').textContent = hora;
-                irPara(3);
-            } catch (e) {
-                $('erro').textContent = 'Não foi possível enviar. Tente de novo ou procure a recepção.';
-            } finally {
-                $('btn-avancar').disabled = false;
+            } else if (p.status === 'expirado' && p.tipo === 'sem_identificacao') {
+                mensagem({ tipo: 'alerta', titulo: 'Ninguém pôde atender agora', texto: 'Procure atendimento na portaria do campus.', botoes: [botaoInicio] });
+            } else if (p.status === 'expirado') {
+                mensagem({
+                    tipo: 'alerta', titulo: 'Não foi possível obter resposta.',
+                    texto: 'Deseja deixar seu contato para agendar uma visita? Se preferir, procure a portaria do campus.',
+                    botoes: [contato, naoObrigado], voltarEm: 45
+                });
+            } else if (p.status === 'encerrado') {
+                mensagem({ tipo: 'ok', titulo: 'Atendimento concluído', texto: 'Obrigado!', voltarEm: 8 });
             }
         }
 
+        async function enviarContato() {
+            const r = await Api.deixarContato(pedidoId, { contato: $('contato').value });
+            if (r.erro) return $('erro-contato').textContent = r.mensagem;
+            mensagem({ tipo: 'ok', titulo: 'Contato enviado', texto: 'O responsável vai procurar você para combinar uma visita.', voltarEm: 10 });
+        }
+
+        /* ---------- Usuário cadastrado ---------- */
+        function irCredencial() {
+            pin = '';
+            desenharPin();
+            irPara('t-credencial');
+            $('matricula').focus();
+        }
+
+        function montarTeclado() {
+            const teclas = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'Apagar', '0', 'Entrar'];
+            $('teclado').innerHTML = '';
+            teclas.forEach(t => {
+                const b = document.createElement('button');
+                b.textContent = t;
+                if (t === 'Entrar') b.className = 'ok';
+                if (t === 'Apagar') b.className = 'apagar';
+                b.onclick = () => {
+                    if (t === 'Apagar') pin = pin.slice(0, -1);
+                    else if (t === 'Entrar') return enviarCredencial();
+                    else if (pin.length < TAMANHO_PIN) pin += t;
+                    desenharPin();
+                };
+                $('teclado').appendChild(b);
+            });
+        }
+
+        function desenharPin() {
+            $('pin-visor').innerHTML = Array.from({ length: TAMANHO_PIN }, (_, i) => `<span>${i < pin.length ? '•' : ''}</span>`).join('');
+        }
+
+        async function enviarCredencial() {
+            const matricula = $('matricula').value.trim();
+            if (!matricula) return $('erro-cred').textContent = 'Informe sua matrícula ou SIAPE.';
+            if (pin.length < TAMANHO_PIN) return $('erro-cred').textContent = `O PIN tem ${TAMANHO_PIN} dígitos.`;
+            const r = await Api.identificar({ matricula, pin });
+            pin = '';
+            desenharPin();
+            const primeiroNome = (r.nome || '').split(' ')[0];
+            const visitante = { texto: 'Sou visitante', acao: () => irPara('t-privacidade') };
+
+            if (r.tipo === 'entrada') return mensagem({ tipo: 'ok', titulo: `Bem-vindo, ${primeiroNome}`, texto: `Entrada registrada às ${hora(r.acesso.entrada)}. Aguarde a abertura da porta.`, voltarEm: 6 });
+            if (r.tipo === 'saida') return mensagem({ tipo: 'ok', titulo: `Até logo, ${primeiroNome}`, texto: `Saída registrada às ${hora(r.acesso.saida)}.`, voltarEm: 6 });
+
+            switch (r.erro) {
+                case 'credencial_invalida':
+                    return $('erro-cred').textContent = `Matrícula ou PIN incorretos. Tentativas restantes: ${r.restantes}.`;
+                case 'bloqueio_temporario':
+                    return mensagem({ tipo: 'erro', titulo: 'Credencial bloqueada temporariamente', texto: `Muitas tentativas inválidas. Tente de novo após ${hora(r.ate)}. A coordenação foi avisada.`, botoes: [botaoInicio] });
+                case 'bloqueado':
+                    return mensagem({ tipo: 'erro', titulo: 'Acesso bloqueado', texto: 'Procure a coordenação do laboratório.', botoes: [botaoInicio] });
+                case 'inativo':
+                    return mensagem({ tipo: 'alerta', titulo: 'Cadastro inativo', texto: 'Seu vínculo não está ativo. Procure a coordenação ou entre como visitante.', botoes: [botaoInicio, visitante] });
+                case 'nao_autorizado':
+                    return mensagem({ tipo: 'alerta', titulo: 'Você não está autorizado neste laboratório', texto: 'Se quiser, faça um pedido como visitante.', botoes: [botaoInicio, visitante] });
+                case 'uso_restrito':
+                    return mensagem({ tipo: 'alerta', titulo: `Laboratório em uso restrito até ${hora(r.ate)}`, texto: 'Há equipamento perigoso em uso. Só quem está na reserva pode entrar.', botoes: [botaoInicio] });
+                default:
+                    return mensagem({ tipo: 'alerta', titulo: 'Sem conexão com o servidor', texto: 'Procure a portaria ou a Diretoria de Pesquisa para liberação manual.', botoes: [botaoInicio] });
+            }
+        }
+
+        /* ---------- Relógio, inatividade e atualização ---------- */
         ['pointerdown', 'keydown', 'input'].forEach(ev => document.addEventListener(ev, () => ultimoToque = Date.now(), true));
+
         setInterval(() => {
-            $('relogio').textContent = horaAtual();
-            if (passoAtual === 2 && Date.now() - ultimoToque > INATIVIDADE_MS) reiniciar();
+            $('relogio').textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const livre = telaAtual === 't-inicio' || telaAtual === 't-aguardando';
+            if (!livre && Date.now() - ultimoToque > INATIVIDADE_MS) reiniciar();
+            if (telaAtual === 't-aguardando') acompanharPedido();
         }, 1000);
 
-        carregarResponsaveis();
+        Api.aoMudar(acompanharPedido);
+        iniciar();
     </script>
 </body>
 </html>

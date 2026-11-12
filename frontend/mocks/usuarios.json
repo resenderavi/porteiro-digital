@@ -1,0 +1,8 @@
+[
+  { "matricula": "20241BSI0012", "nome": "Pedro Almeida", "vinculo": "aluno", "perfil": "bolsista", "ativo": true, "bloqueado": false, "pin_hash": "3d6163cf973346a1af6975a179f8f1ec02812da55b21887b086c767a92a304c7" },
+  { "matricula": "20232BSI0045", "nome": "Ana Clara Souza", "vinculo": "aluno", "perfil": "usuario", "ativo": true, "bloqueado": false, "pin_hash": "6be0932cea117994d5a2ae78ac4126bf89b6ba424cb97f0757bb582d400564e7" },
+  { "matricula": "1845321", "nome": "Marcos Vieira", "vinculo": "servidor", "perfil": "usuario", "ativo": true, "bloqueado": false, "pin_hash": "a1a55a819152626a368a6e8dc6648aab08baffe1cfb986c880dba7cd779e9a0f" },
+  { "matricula": "L-0007", "nome": "Rosa Lima", "vinculo": "servidor", "perfil": "limpeza", "ativo": true, "bloqueado": false, "pin_hash": "1855810e578d4ae4df147ee1b58d7379c2ab2a0edc940756d6d11071f1af58bb" },
+  { "matricula": "20201BSI0003", "nome": "João Batista", "vinculo": "aluno", "perfil": "usuario", "ativo": false, "bloqueado": false, "pin_hash": "f8b4689084f5c3762a8e05c345a1ead61c243545076c5786b66fb0d202e8961b" },
+  { "matricula": "20242BSI0099", "nome": "Bruno Teixeira", "vinculo": "aluno", "perfil": "usuario", "ativo": true, "bloqueado": true, "pin_hash": "2de81fe3668920dd298ea97633397c6d6cdf453e07d8dbfe9d9fb5803b1410a9" }
+]

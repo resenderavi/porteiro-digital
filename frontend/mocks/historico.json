@@ -1,7 +1,8 @@
 [
-  { "nome": "Mariana Costa", "hora_entrada": "08:10", "status": "autorizado" },
-  { "nome": "Roberto Silva", "hora_entrada": "08:30", "status": "autorizado" },
-  { "nome": "Juliana Martins", "hora_entrada": "09:00", "status": "recusado" },
-  { "nome": "Fernando Gomes", "hora_entrada": "09:20", "status": "autorizado" },
-  { "nome": "Beatriz Rocha", "hora_entrada": "10:05", "status": "autorizado" }
+  { "id": "A-001", "pessoa": { "tipo": "usuario", "id": "L-0007", "nome": "Rosa Lima", "perfil": "limpeza" }, "entrada": "2026-11-12T07:30:00", "saida": "2026-11-12T08:10:00", "origem": "credencial", "autorizado_por": null, "justificativa": null },
+  { "id": "A-002", "pessoa": { "tipo": "usuario", "id": "20241BSI0012", "nome": "Pedro Almeida", "perfil": "bolsista" }, "entrada": "2026-11-12T08:05:00", "saida": "2026-11-12T11:50:00", "origem": "credencial", "autorizado_por": null, "justificativa": null },
+  { "id": "A-003", "pessoa": { "tipo": "usuario", "id": "20232BSI0045", "nome": "Ana Clara Souza", "perfil": "usuario" }, "entrada": "2026-11-12T08:40:00", "saida": "2026-11-12T10:30:00", "origem": "credencial", "autorizado_por": null, "justificativa": null },
+  { "id": "A-004", "pessoa": { "tipo": "visitante", "id": "P-001", "nome": "Juliana Ferreira", "perfil": "visitante" }, "entrada": "2026-11-12T09:18:00", "saida": "2026-11-12T10:02:00", "origem": "visita_autorizada", "autorizado_por": "Profa. Helena Duarte", "justificativa": null },
+  { "id": "A-005", "pessoa": { "tipo": "usuario", "id": "1845321", "nome": "Marcos Vieira", "perfil": "usuario" }, "entrada": "2026-11-12T09:50:00", "saida": null, "origem": "credencial", "autorizado_por": null, "justificativa": null },
+  { "id": "A-006", "pessoa": { "tipo": "usuario", "id": "20232BSI0045", "nome": "Ana Clara Souza", "perfil": "usuario" }, "entrada": "2026-11-12T10:45:00", "saida": null, "origem": "liberacao_manual", "autorizado_por": "Anderson Lima", "justificativa": "Falha de rede na tela. Aluna identificada presencialmente." }
 ]
