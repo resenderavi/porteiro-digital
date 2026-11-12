@@ -1,148 +1,251 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <title>Porteiro Digital - Registo de Visitantes</title>
-    
+    <title>Porteiro Digital — Recepção</title>
     <style>
-        html, body { 
-            margin: 0; 
-            overflow: hidden; 
-            height: 100%; 
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-        }
-        
-        * { 
-            cursor: none; 
-        }
-        
-        body { 
-            font-size: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-        }
-        
-        input, button { 
-            font-size: 1.2rem; 
-            min-height: 60px; 
-            margin: 10px 0; 
-            width: 100%; 
-            max-width: 500px; 
-            box-sizing: border-box; 
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-        
-        button { 
-            background-color: #004c97; 
-            color: white; 
-            border: none; 
-            font-weight: bold; 
-        }
-        
-        button.voltar { 
-            background-color: #e0e0e0; 
-            color: #333; 
+        /* ---- Regras obrigatórias de kiosk (S5) ---- */
+        html, body { margin: 0; overflow: hidden; height: 100%; }
+        * { cursor: none; box-sizing: border-box; }
+        body.mostrar-cursor * { cursor: auto; }   /* ?cursor=1 para testar no computador */
+        body { font-size: 20px; }
+        input, button, select { font-size: 1.2rem; min-height: 60px; font-family: inherit; }
+
+        :root {
+            --primaria: #004c97;
+            --primaria-escura: #003a75;
+            --fundo: #eef2f7;
+            --texto: #1c2430;
+            --suave: #4f5b6b;
+            --borda: #c9d2de;
+            --ok: #1e7e34;
+            --erro: #c62828;
         }
 
-        button.confirmar {
-            background-color: #28a745; 
+        body {
+            font-family: "Segoe UI", Roboto, Arial, sans-serif;
+            background: var(--fundo);
+            color: var(--texto);
+            display: flex;
+            flex-direction: column;
+            user-select: none;
         }
-        
-        .passo { 
-            display: none; 
-            width: 90%; 
-            max-width: 600px; 
-            text-align: center; 
-            background: white; 
-            padding: 40px; 
-            border-radius: 16px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+
+        header {
+            height: 72px; flex: none;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 32px;
+            background: var(--primaria); color: #fff;
         }
-        
-        .passo.ativo { 
-            display: block; 
+        header .marca { font-weight: 700; font-size: 1.3rem; }
+        header .relogio { font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+
+        main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; min-height: 0; }
+
+        /* Cada passo do wizard é mostrado/escondido com display: block/none */
+        .passo {
+            display: none;
+            width: 100%; max-width: 900px; max-height: 100%;
+            background: #fff; border-radius: 20px;
+            padding: 40px 48px;
+            box-shadow: 0 6px 24px rgba(0, 40, 90, .10);
         }
-        
-        h2 { color: #333; margin-top: 0; font-size: 1.8rem; }
-        
-        #resumo {
-            text-align: left;
-            margin: 20px auto;
-            max-width: 400px;
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
+        .passo.ativo { display: block; }
+
+        h1 { font-size: 3rem; margin: 0 0 12px; }
+        h2 { font-size: 2rem; margin: 0 0 8px; }
+        p { margin: 0 0 16px; line-height: 1.4; }
+        .centro { text-align: center; }
+        .suave { color: var(--suave); }
+
+        button {
+            border: none; border-radius: 12px;
+            padding: 0 32px; font-weight: 600;
+            background: var(--primaria); color: #fff;
+        }
+        button:active { background: var(--primaria-escura); }
+        button.secundario { background: #e3e8ef; color: var(--texto); }
+        button.grande { min-height: 88px; font-size: 1.5rem; padding: 0 56px; margin-top: 28px; }
+
+        /* Formulário: 2 colunas como no wireframe (Nome | Motivo / CPF | Responsável) */
+        .campos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 28px; margin-top: 16px; }
+        label { display: block; font-weight: 600; margin: 12px 0 8px; }
+        input, select {
+            width: 100%; padding: 0 18px;
+            border: 2px solid var(--borda); border-radius: 12px;
+            background: #fff; color: var(--texto);
+        }
+        input:focus, select:focus { outline: none; border-color: var(--primaria); box-shadow: 0 0 0 3px rgba(0, 76, 151, .2); }
+        input.invalido, select.invalido { border-color: var(--erro); }
+        .erro { color: var(--erro); font-weight: 600; min-height: 1.4em; margin: 16px 0 0; }
+        .acoes { display: flex; gap: 16px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
+        .acoes button { min-width: 180px; }
+
+        .icone-ok {
+            width: 104px; height: 104px; border-radius: 50%;
+            margin: 0 auto 20px; background: var(--ok); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 3.4rem; font-weight: 700;
+        }
+        .hora-entrada { font-size: 1.4rem; font-weight: 700; color: var(--primaria); }
+
+        /* Tablet em retrato (800×1280): uma coluna */
+        @media (max-aspect-ratio: 1/1) {
+            .campos { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
+    <header>
+        <div class="marca">Porteiro Digital</div>
+        <div class="relogio" id="relogio">--:--</div>
+    </header>
 
-    <div id="passo1" class="passo ativo">
-        <h2>Bem-vindo!</h2>
-        <p>Por favor, insira os seus dados para iniciar o registo.</p>
-        <input type="text" id="nome" placeholder="Nome Completo" required>
-        <input type="text" id="cpf" placeholder="CPF (ex: 123.456.789-00)" required>
-        <button onclick="proximoPasso(1, 2)">Próximo</button>
-    </div>
+    <main>
+        <!-- Estado 1: boas-vindas -->
+        <section class="passo ativo centro" id="passo1">
+            <h1>Bem-vindo!</h1>
+            <p class="suave">Registre sua visita para entrar.</p>
+            <button class="grande" onclick="irPara(2)">Toque aqui para iniciar</button>
+        </section>
 
-    <div id="passo2" class="passo">
-        <h2>Detalhes da Visita</h2>
-        <input type="text" id="motivo" placeholder="Motivo da visita" required>
-        <input type="text" id="responsavel" placeholder="Responsável a visitar" required>
-        <button class="voltar" onclick="proximoPasso(2, 1)">Voltar</button>
-        <button onclick="proximoPasso(2, 3)">Próximo</button>
-    </div>
+        <!-- Estado 2: formulário (Nome, CPF, Motivo, Responsável) -->
+        <section class="passo" id="passo2">
+            <h2>Seus dados</h2>
+            <p class="suave">Preencha todos os campos e toque em Avançar.</p>
+            <div class="campos">
+                <div>
+                    <label for="nome">Nome completo</label>
+                    <input type="text" id="nome" autocomplete="off" maxlength="80">
+                </div>
+                <div>
+                    <label for="motivo">Motivo da visita</label>
+                    <input type="text" id="motivo" autocomplete="off" maxlength="120">
+                </div>
+                <div>
+                    <label for="cpf">CPF</label>
+                    <input type="text" id="cpf" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00">
+                </div>
+                <div>
+                    <label for="responsavel">Responsável a visitar</label>
+                    <select id="responsavel"><option value="">Carregando…</option></select>
+                </div>
+            </div>
+            <p class="erro" id="erro"></p>
+            <div class="acoes">
+                <button class="secundario" onclick="reiniciar()">Voltar</button>
+                <button id="btn-avancar" onclick="enviar()">Avançar</button>
+            </div>
+        </section>
 
-    <div id="passo3" class="passo">
-        <h2>Confirmação</h2>
-        <p>Verifique se os dados estão corretos:</p>
-        <div id="resumo"></div>
-        <button class="voltar" onclick="proximoPasso(3, 2)">Voltar</button>
-        <button class="confirmar" onclick="enviarFormulario()">Confirmar e Enviar</button>
-    </div>
+        <!-- Estado 3: registro concluído -->
+        <section class="passo centro" id="passo3">
+            <div class="icone-ok">✓</div>
+            <h2>Registro concluído!</h2>
+            <p class="suave">Aguarde a autorização na recepção.</p>
+            <p>Hora de entrada: <span class="hora-entrada" id="hora-entrada">--:--</span></p>
+            <div class="acoes">
+                <button onclick="reiniciar()">Sair</button>
+            </div>
+        </section>
+    </main>
 
-    <div id="passo4" class="passo">
-        <h2>Registo Concluído!</h2>
-        <p>Por favor, aguarde a autorização na receção.</p>
-    </div>
-
+    <script src="../js/api.js"></script>
     <script>
-        function proximoPasso(atual, proximo) {
-            if (proximo === 3) {
-                const nome = document.getElementById('nome').value || 'Não preenchido';
-                const cpf = document.getElementById('cpf').value || 'Não preenchido';
-                const motivo = document.getElementById('motivo').value || 'Não preenchido';
-                const responsavel = document.getElementById('responsavel').value || 'Não preenchido';
-                
-                document.getElementById('resumo').innerHTML = `
-                    <p><strong>Nome:</strong> ${nome}</p>
-                    <p><strong>CPF:</strong> ${cpf}</p>
-                    <p><strong>Motivo:</strong> ${motivo}</p>
-                    <p><strong>Responsável:</strong> ${responsavel}</p>
-                `;
+        const INATIVIDADE_MS = 2 * 60 * 1000;   // volta ao início se ninguém mexer
+        const VOLTA_AUTOMATICA_MS = 15 * 1000;  // depois do "Registro concluído"
+
+        let passoAtual = 1;
+        let ultimoToque = Date.now();
+        let temporizador = null;
+        const $ = (id) => document.getElementById(id);
+        const horaAtual = () => new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+        if (new URLSearchParams(location.search).has('cursor')) document.body.classList.add('mostrar-cursor');
+
+        function irPara(n) {
+            clearTimeout(temporizador);
+            $('passo' + passoAtual).classList.remove('ativo');
+            $('passo' + n).classList.add('ativo');
+            passoAtual = n;
+            if (n === 2) $('nome').focus();
+            if (n === 3) temporizador = setTimeout(reiniciar, VOLTA_AUTOMATICA_MS);
+        }
+
+        function reiniciar() {
+            ['nome', 'cpf', 'motivo', 'responsavel'].forEach(id => { $(id).value = ''; $(id).classList.remove('invalido'); });
+            $('erro').textContent = '';
+            irPara(1);
+        }
+
+        /* Responsáveis vêm da API (anotação do wireframe) */
+        async function carregarResponsaveis() {
+            try {
+                const lista = await Api.listarResponsaveis();
+                $('responsavel').innerHTML = '<option value="">Escolha…</option>' +
+                    lista.map(r => `<option>${r.nome.replace(/</g, '&lt;')}</option>`).join('');
+            } catch (e) {
+                $('responsavel').innerHTML = '<option value="">Sem conexão</option>';
             }
-
-            document.getElementById('passo' + atual).classList.remove('ativo');
-            document.getElementById('passo' + proximo).classList.add('ativo');
         }
 
-        function enviarFormulario() {
-            proximoPasso(3, 4);
-            
-            setTimeout(() => {
-                document.getElementById('nome').value = '';
-                document.getElementById('cpf').value = '';
-                document.getElementById('motivo').value = '';
-                document.getElementById('responsavel').value = '';
-                proximoPasso(4, 1);
-            }, 5000);
+        /* Máscara do CPF enquanto digita: 000.000.000-00 */
+        $('cpf').addEventListener('input', () => {
+            const d = $('cpf').value.replace(/\D/g, '').slice(0, 11);
+            $('cpf').value = d.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        });
+
+        function cpfValido(cpf) {
+            const d = cpf.replace(/\D/g, '');
+            if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
+            for (let t = 9; t < 11; t++) {
+                let soma = 0;
+                for (let i = 0; i < t; i++) soma += d[i] * (t + 1 - i);
+                if (((soma * 10) % 11) % 10 !== Number(d[t])) return false;
+            }
+            return true;
         }
+
+        function validar() {
+            const erros = [];
+            const marcar = (id, ok, msg) => { $(id).classList.toggle('invalido', !ok); if (!ok) erros.push(msg); };
+            marcar('nome', $('nome').value.trim().length >= 3, 'informe o nome completo');
+            marcar('cpf', cpfValido($('cpf').value), 'CPF inválido');
+            marcar('motivo', $('motivo').value.trim().length > 0, 'informe o motivo');
+            marcar('responsavel', $('responsavel').value !== '', 'escolha o responsável');
+            $('erro').textContent = erros.length ? 'Verifique: ' + erros.join(', ') + '.' : '';
+            return erros.length === 0;
+        }
+
+        async function enviar() {
+            if (!validar()) return;
+            const hora = horaAtual();               // hora de entrada calculada pelo frontend
+            $('btn-avancar').disabled = true;
+            try {
+                await Api.criarVisitante({
+                    nome: $('nome').value.trim(),
+                    cpf: $('cpf').value,
+                    motivo: $('motivo').value.trim(),
+                    responsavel: $('responsavel').value,
+                    hora_chegada: hora
+                });
+                $('hora-entrada').textContent = hora;
+                irPara(3);
+            } catch (e) {
+                $('erro').textContent = 'Não foi possível enviar. Tente de novo ou procure a recepção.';
+            } finally {
+                $('btn-avancar').disabled = false;
+            }
+        }
+
+        ['pointerdown', 'keydown', 'input'].forEach(ev => document.addEventListener(ev, () => ultimoToque = Date.now(), true));
+        setInterval(() => {
+            $('relogio').textContent = horaAtual();
+            if (passoAtual === 2 && Date.now() - ultimoToque > INATIVIDADE_MS) reiniciar();
+        }, 1000);
+
+        carregarResponsaveis();
     </script>
 </body>
 </html>

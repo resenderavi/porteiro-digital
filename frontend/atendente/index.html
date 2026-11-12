@@ -1,192 +1,181 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Porteiro Digital - Atendente</title>
+    <title>Porteiro Digital — Atendente</title>
     <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            padding: 20px;
+        :root {
+            --primaria: #004c97;
+            --fundo: #eef2f7;
+            --texto: #1c2430;
+            --suave: #556172;
+            --borda: #d5dce6;
+            --aguardando: #b35c00;    --aguardando-bg: #fff3e0;
+            --em_aprovacao: #0b5cad;  --em_aprovacao-bg: #e3eefa;
+            --autorizado: #1e7e34;    --autorizado-bg: #e6f4ea;
+            --recusado: #c62828;      --recusado-bg: #fdecea;
         }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: "Segoe UI", Roboto, Arial, sans-serif; font-size: 15px; background: var(--fundo); color: var(--texto); }
 
-        h1 { color: #004c97; margin-top: 0; }
-        h2 { color: #333; font-size: 1.2rem; border-bottom: 2px solid #eee; padding-bottom: 8px; }
+        header { background: var(--primaria); color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+        header h1 { font-size: 1.3rem; margin: 0; }
+        header .data { opacity: .9; }
 
-        .colunas {
-            display: flex;
-            gap: 20px;
-        }
+        /* Duas colunas: fila à esquerda, detalhe + tabela à direita (wireframe) */
+        .colunas { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr); gap: 20px; padding: 20px 24px; max-width: 1700px; margin: 0 auto; }
+        @media (max-width: 900px) { .colunas { grid-template-columns: 1fr; } }
 
-        .coluna-esquerda { width: 55%; }
-        .coluna-direita { width: 45%; }
+        .caixa { background: #fff; border-radius: 12px; padding: 16px 18px; box-shadow: 0 2px 8px rgba(0, 40, 90, .07); margin-bottom: 20px; }
+        .caixa h2 { font-size: 1.05rem; margin: 0 0 12px; display: flex; align-items: center; gap: 10px; }
+        .contador { background: var(--fundo); color: var(--suave); border-radius: 999px; padding: 1px 9px; font-size: .8rem; }
 
-        .caixa {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
+        /* Fila */
+        .fila { display: flex; flex-direction: column; gap: 8px; max-height: calc(100vh - 170px); overflow-y: auto; }
         .card {
-            background: #f9f9f9;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            border-left: 6px solid #ccc;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; justify-content: space-between; align-items: center; gap: 10px;
+            padding: 12px 14px; border-radius: 8px; background: #f6f8fb;
+            border-left: 6px solid var(--cor); cursor: pointer;
         }
+        .card:hover { background: #edf2f8; }
+        .card.selecionado { outline: 2px solid var(--primaria); background: #edf2f8; }
+        .card .nome { font-weight: 600; }
+        .card .hora { color: var(--suave); font-variant-numeric: tabular-nums; }
 
-        .card:hover { background: #eef2f7; }
+        .status { font-size: .78rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; color: var(--cor); background: var(--cor-bg); white-space: nowrap; }
+        .aguardando { --cor: var(--aguardando); --cor-bg: var(--aguardando-bg); }
+        .em_aprovacao { --cor: var(--em_aprovacao); --cor-bg: var(--em_aprovacao-bg); }
+        .autorizado { --cor: var(--autorizado); --cor-bg: var(--autorizado-bg); }
+        .recusado { --cor: var(--recusado); --cor-bg: var(--recusado-bg); }
 
-        .aguardando { border-left-color: orange; }
-        .em_aprovacao { border-left-color: #007bff; }
-        .autorizado { border-left-color: #28a745; }
-        .recusado { border-left-color: #dc3545; }
+        /* Detalhe */
+        dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 10px 20px; font-size: 1.05rem; }
+        dt { color: var(--suave); }
+        dd { margin: 0; font-weight: 600; }
+        .vazio { color: var(--suave); }
+        .botoes { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+        button { font: inherit; font-weight: 700; border: none; border-radius: 8px; padding: 12px 26px; color: #fff; cursor: pointer; }
+        button:hover { filter: brightness(1.1); }
+        button:disabled { opacity: .45; cursor: default; filter: none; }
+        .btn-aprovar { background: var(--autorizado); }
+        .btn-recusar { background: var(--recusado); }
 
-        button {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            margin-right: 10px;
-            font-size: 1rem;
-        }
-
-        .btn-aprovar { background-color: #28a745; }
-        .btn-recusar { background-color: #dc3545; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th, td {
-            border-bottom: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        th { background-color: #f4f4f9; }
+        /* Tabela */
+        .tabela-box { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--borda); }
+        th { background: #f4f6f9; font-size: .85rem; color: var(--suave); }
     </style>
 </head>
 <body>
-
-    <h1>Porteiro Digital - Painel do Atendente</h1>
+    <header>
+        <h1>Porteiro Digital — Painel do Atendente</h1>
+        <span class="data" id="data"></span>
+    </header>
 
     <div class="colunas">
-        
-        <div class="coluna-esquerda">
-            <div class="caixa">
-                <h2>Fila de Visitantes</h2>
-                <div id="fila"></div>
-            </div>
+        <section class="caixa">
+            <h2>Fila de visitantes <span class="contador" id="contador">0 aguardando</span></h2>
+            <div class="fila" id="fila"><p class="vazio">Carregando…</p></div>
+        </section>
 
-            <div class="caixa">
-                <h2>Histórico do Dia</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Hora entrada</th>
-                            <th>Hora saída</th>
-                            <th>Responsável</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-historico"></tbody>
-                </table>
-            </div>
-        </div>
+        <div>
+            <section class="caixa">
+                <h2>Visitante selecionado</h2>
+                <div id="detalhes"><p class="vazio">Clique em um visitante da fila para ver os dados.</p></div>
+            </section>
 
-        <div class="coluna-direita">
-            <div class="caixa">
-                <h2>Detalhes do Visitante</h2>
-                <div id="detalhes">
-                    <p>Clique num visitante da fila para ver os dados.</p>
+            <section class="caixa">
+                <h2>Registros do dia</h2>
+                <div class="tabela-box">
+                    <table>
+                        <thead><tr><th>Nome</th><th>Hora de entrada</th><th>Status</th></tr></thead>
+                        <tbody id="tabela"></tbody>
+                    </table>
                 </div>
-            </div>
+            </section>
         </div>
-
     </div>
 
+    <script src="../js/api.js"></script>
     <script>
+        const ROTULOS = { aguardando: 'Aguardando', em_aprovacao: 'Em aprovação', autorizado: 'Autorizado', recusado: 'Recusado' };
         let visitantes = [];
+        let selecionado = null;
 
-        function mascararCPF(cpf) {
-            return cpf.substring(0, 3) + ".***.***-" + cpf.slice(-2);
+        const $ = (id) => document.getElementById(id);
+        const esc = (t) => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const etiqueta = (s) => `<span class="status ${s}">${ROTULOS[s] || esc(s)}</span>`;
+
+        // CPF mascarado (S6): 123.***.***-00
+        const mascararCPF = (cpf) => cpf ? cpf.substring(0, 3) + '.***.***-' + cpf.slice(-2) : '—';
+
+        $('data').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
+
+        async function atualizar() {
+            try {
+                const [fila, historico] = await Promise.all([Api.listarFila(), Api.listarHistorico()]);
+                visitantes = fila;
+                renderFila(fila);
+                renderDetalhes();
+                renderTabela(historico);
+            } catch (e) {
+                $('fila').innerHTML = '<p class="vazio">Não foi possível carregar a fila. (Abra pelo Live Server.)</p>';
+            }
         }
 
-        // 1. Busca os dados dos JSONs usando fetch() conforme pede a S7
-        fetch('../mocks/fila.json')
-            .then(r => r.json())
-            .then(data => {
-                visitantes = data;
-                renderFila(visitantes);
-            });
-
-        fetch('../mocks/historico.json')
-            .then(r => r.json())
-            .then(data => {
-                const tbody = document.getElementById('tabela-historico');
-                data.forEach(h => {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${h.nome}</td>
-                            <td>${h.hora_entrada}</td>
-                            <td>${h.hora_saida}</td>
-                            <td>${h.responsavel}</td>
-                        </tr>
-                    `;
-                });
-            });
-
-        // 2. Função renderFila(dados) exigida na S7
+        // Gera os cards da fila: "Nome — hora" + status. Quem ainda espera aparece primeiro.
         function renderFila(dados) {
-            const divFila = document.getElementById('fila');
-            divFila.innerHTML = '';
-
-            dados.forEach(v => {
-                divFila.innerHTML += `
-                    <div class="card ${v.status}" onclick="mostrarDetalhes(${v.id})">
-                        <span><strong>${v.nome}</strong> (${v.hora_chegada})</span>
-                        <span>${v.status.replace('_', ' ').toUpperCase()}</span>
-                    </div>
-                `;
-            });
+            const ordem = { aguardando: 0, em_aprovacao: 1, autorizado: 2, recusado: 2 };
+            const lista = dados.slice().sort((a, b) => (ordem[a.status] - ordem[b.status]) || a.hora_chegada.localeCompare(b.hora_chegada));
+            $('contador').textContent = `${dados.filter(v => v.status === 'aguardando').length} aguardando`;
+            $('fila').innerHTML = lista.length ? lista.map(v => `
+                <div class="card ${v.status} ${v.id === selecionado ? 'selecionado' : ''}" onclick="selecionar(${v.id})">
+                    <span><span class="nome">${esc(v.nome)}</span> <span class="hora">· ${esc(v.hora_chegada)}</span></span>
+                    ${etiqueta(v.status)}
+                </div>`).join('') : '<p class="vazio">Nenhum visitante na fila.</p>';
         }
 
-        // 3. Mostra os detalhes quando clica no card
-        function mostrarDetalhes(id) {
-            const v = visitantes.find(item => item.id === id);
-            document.getElementById('detalhes').innerHTML = `
-                <p><strong>Nome:</strong> ${v.nome}</p>
-                <p><strong>CPF:</strong> ${mascararCPF(v.cpf)}</p>
-                <p><strong>Motivo:</strong> ${v.motivo}</p>
-                <p><strong>Responsável:</strong> ${v.responsavel}</p>
-                <p><strong>Hora de chegada:</strong> ${v.hora_chegada}</p>
-                <p><strong>Status:</strong> ${v.status.replace('_', ' ')}</p>
-                <br>
-                <button class="btn-aprovar" onclick="mudarStatus(${v.id}, 'autorizado')">Aprovar entrada</button>
-                <button class="btn-recusar" onclick="mudarStatus(${v.id}, 'recusado')">Recusar</button>
-            `;
+        // Ao abrir um visitante que estava aguardando, ele passa para "em aprovação".
+        async function selecionar(id) {
+            selecionado = id;
+            const v = visitantes.find(x => x.id === id);
+            if (v && v.status === 'aguardando') await Api.mudarStatus(id, 'em_aprovacao');
+            atualizar();
         }
 
-        // 4. Muda o status ao clicar nos botões
-        function mudarStatus(id, novoStatus) {
-            const v = visitantes.find(item => item.id === id);
-            v.status = novoStatus;
-            renderFila(visitantes);
-            mostrarDetalhes(id);
+        function renderDetalhes() {
+            const v = visitantes.find(x => x.id === selecionado);
+            if (!v) return;
+            const decidido = v.status === 'autorizado' || v.status === 'recusado';
+            $('detalhes').innerHTML = `
+                <dl>
+                    <dt>Nome</dt><dd>${esc(v.nome)}</dd>
+                    <dt>CPF</dt><dd>${esc(mascararCPF(v.cpf))}</dd>
+                    <dt>Motivo</dt><dd>${esc(v.motivo)}</dd>
+                    <dt>Responsável</dt><dd>${esc(v.responsavel)}</dd>
+                    <dt>Chegada</dt><dd>${esc(v.hora_chegada)}</dd>
+                    <dt>Status</dt><dd>${etiqueta(v.status)}</dd>
+                </dl>
+                <div class="botoes">
+                    <button class="btn-aprovar" onclick="decidir(${v.id}, 'autorizado')" ${decidido ? 'disabled' : ''}>Aprovar</button>
+                    <button class="btn-recusar" onclick="decidir(${v.id}, 'recusado')" ${decidido ? 'disabled' : ''}>Recusar</button>
+                </div>`;
         }
+
+        async function decidir(id, status) {
+            await Api.mudarStatus(id, status);
+            atualizar();
+        }
+
+        function renderTabela(historico) {
+            $('tabela').innerHTML = historico.slice().reverse().map(h => `
+                <tr><td>${esc(h.nome)}</td><td>${esc(h.hora_entrada)}</td><td>${etiqueta(h.status)}</td></tr>`).join('');
+        }
+
+        Api.aoMudar(atualizar);   // o tablet cadastrou alguém em outra aba
+        atualizar();
     </script>
 </body>
 </html>
